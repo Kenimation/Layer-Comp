@@ -1,10 +1,10 @@
 ![Image](https://imgur.com/CGxHlc4.png)
 
-# [Blender Extensions](https://extensions.blender.org/add-ons/references-overlays/)
+# Blender Extensions
 
 # Layer-based compositing tool for Blender!!! 
 Layer-based compositing tool, similar to After Effects.
-It's not just simply adding filter on screen. You can composite it with AOVs, View Layer, Mask and more.
+It's not just simply adding a filter on the screen. You can composite it with AOVs, View Layer, Media and more.
 
 # Features
 * Support AOVs Layer.
@@ -23,10 +23,10 @@ It's not just simply adding filter on screen. You can composite it with AOVs, Vi
 * Compositor > Sidebar > Layer Comp
 
 # Documentation
-The exstension was developed within an Anime workflow primarily using After Effects. Some simple compositing was required, which I hoped to accomplish using Blender.
+The extension was developed within an Anime workflow primarily using After Effects. Some simple compositing was required, which I hoped to accomplish using Blender.
 Therefore, the addon's workflow is similar to After Effects. If you've used it before, this will help you better understand the addon.
 
-This addon provides a system and pipeline; it won't provide many more feature nodes update in the future. It rely the user to create their effect presets.
+This addon provides a system and pipeline; it won't provide many more feature node updates in the future. It relies on the user to create their effect presets.
 
 # User Interface
 * Drag layer and effect directly
@@ -57,7 +57,7 @@ This addon provides a system and pipeline; it won't provide many more feature no
 ![Image](https://i.imgur.com/Wt7tIgx.png)
 
 # Future
-* Add sub socket for effect node
+* Add sub-socket for the effect node
 * Better output system
 
 # Compatibility
