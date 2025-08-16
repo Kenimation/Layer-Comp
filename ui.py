@@ -115,8 +115,8 @@ class NODE_PT_Compositor_Layer(bpy.types.Panel, Compositor_Layer):
 	bl_space_type = 'NODE_EDITOR'
 	bl_region_type = 'UI'
 	bl_idname = "NODE_PT_Compositor_Layer"
-	bl_label = "Compositor Layer"
-	bl_category = "Compositor Layer"
+	bl_label = "Layer Comp"
+	bl_category = "Layer Comp"
 
 	@classmethod
 	def poll(cls, context):
@@ -125,9 +125,9 @@ class NODE_PT_Compositor_Layer(bpy.types.Panel, Compositor_Layer):
 class VIEW_PT_Compositor_Layer(bpy.types.Panel, Compositor_Layer):
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
-	bl_label = "Compositor Layer"
+	bl_label = "Layer Comp"
 	bl_idname = "VIEW_PT_Compositor_Layer"
-	bl_category = "Compositor Layer"
+	bl_category = "Layer Comp"
 
 	@classmethod
 	def poll(cls, context):
