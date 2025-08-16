@@ -39,14 +39,14 @@ def get_invert_node_inputs(invert_node, input, value):
 	version = bpy.app.version
 	if version >= (4, 5, 0):
 		if input == 'Color':
-			invert_node.inputs[3].default_value = value
-		elif input == 'Alpha':
 			invert_node.inputs[2].default_value = value
+		elif input == 'Alpha':
+			invert_node.inputs[3].default_value = value
 	elif version < (4, 5, 0):
 		if input == 'Color':
-			invert_node.invert_alpha = value
-		elif input == 'Alpha':
 			invert_node.invert_rgb = value
+		elif input == 'Alpha':
+			invert_node.invert_alpha = value
 
 class Node:
 	def free(self):

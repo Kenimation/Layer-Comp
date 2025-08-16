@@ -19,7 +19,7 @@ class Layer_Props(Matte_Props, bpy.types.PropertyGroup):
 
 		if node_group.nodes.get(f"{self.sub_name}.Frame"):
 			frame = node_group.nodes.get(f"{self.sub_name}.Frame")
-			frame.name = node.name.replace(self.sub_name, self.name)
+			frame.name = frame.name.replace(self.sub_name, self.name)
 			frame.label = self.name
 
 		self.sub_name = self.name

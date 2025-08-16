@@ -34,6 +34,7 @@ class CompositorNodeBlurRGB(bpy.types.CompositorNodeCustomGroup, Node):
 		image_socket_1.attribute_domain = 'POINT'
 		image_socket_1.default_input = 'VALUE'
 		image_socket_1.structure_type = 'AUTO'
+		image_socket_1.hide_value = True
 
 		#Socket Offset
 		offset_socket = node_tree.interface.new_socket(name = "Offset", in_out='INPUT', socket_type = 'NodeSocketVector')
