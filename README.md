@@ -4,7 +4,7 @@
 
 # Layer-based compositing tool for Blender!!! 
 Layer-based compositing tool, similar to After Effects.
-It's not just simply adding a filter on the screen. You can composite it with AOVs, View Layer, Mask and more.
+It's not just simply adding a filter on the screen. You can composite it with AOVs, View Layer, Media and more.
 
 # Features
 * Support AOVs Layer.
