@@ -61,4 +61,4 @@ This addon provides a system and pipeline; it won't provide many more feature no
 * Better output system
 
 # Compatibility
-Layer Comp is compatible with older Blender versions, starting from Blender 4.2. But the best use of the addon is version 4.5, some feature and node aren't available in 4.4 or below.
+Layer Comp is compatible with older Blender versions, starting from Blender 4.2. But the best use of the addon is version 4.5, some features and nodes aren't available in 4.4 or below.
