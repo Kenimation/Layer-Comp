@@ -12,6 +12,7 @@ def create_mix_node(node_group):
 	elif version < (4, 5, 0):
 		mix_node = node_group.nodes.new("CompositorNodeMixRGB")
 		mix_node.use_alpha = True
+		mix_node.use_clamp = True
 	return mix_node
 
 def get_mix_node_inputs(mix_node, input):

@@ -1,16 +1,16 @@
 schema_version = "1.0.0"
 
 id = "layer_comp"
-version = "1.0.0"
+version = "1.0.1"
 name = "LayerComp"
 tagline = "Layer-based compositing tool, similar to After Effects"
 maintainer = "KEN <kken498@gmail.com>"
 type = "add-on"
+
 tags = [
-    "Compositng",
+    "Compositing",
     "Node",
     "Render",
-    "Pipeline"
 ]
 blender_version_min = "4.2.0"
 

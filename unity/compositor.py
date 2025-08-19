@@ -252,4 +252,6 @@ def register():
 def unregister():
 	for cls in classes:
 		bpy.utils.unregister_class(cls)
+
+	del bpy.types.NodeTree.compositor_props
 	

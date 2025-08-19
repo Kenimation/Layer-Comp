@@ -1,9 +1,9 @@
 import bpy
 from ..node import *
 
-class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node):
-	bl_name='CompositorNodeReplaceColor'
-	bl_label='Replace Color'
+class CompositorNodeColorReplace(bpy.types.CompositorNodeCustomGroup, Node):
+	bl_name='CompositorNodeColorReplace'
+	bl_label='Color Replace'
 	bl_icon='OVERLAY'
 
 	def update_count(self, context):

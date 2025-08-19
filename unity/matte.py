@@ -29,7 +29,7 @@ class Matte_Props(bpy.types.PropertyGroup):
 		matte_frame = node_group.nodes.get(f"{self.matte}.Frame")
 
 		matte_sub_mix_node = node_group.nodes.get(f'{self.matte}.Mix_Sub')
-		matte_mix_node = node_group.nodes.get(f'{self.matte}.Matte_Mix')
+		set_matte_node = node_group.nodes.get(f'{self.matte}.Set_Matte')
 
 		if self.matte != 'None':
 			matte_math_node = node_group.nodes.get(f'{self.matte}.Mask_Mix')
@@ -59,14 +59,14 @@ class Matte_Props(bpy.types.PropertyGroup):
 				matte_node.mode = 'HSL'
 				matte_node.parent = frame
 				matte_node.location = (invert_node.location[0]-150, invert_node.location[1])
-			if not matte_mix_node:
-				matte_mix_node = create_mix_node(node_group)
-				matte_mix_node.name = f'{self.matte}.Matte_Mix'
-				get_mix_node_inputs(matte_mix_node, 1).default_value = (0, 0, 0, 0)
-				matte_mix_node.parent = matte_frame
-				matte_mix_node.location = (mix_node.location[0], mix_node.location[1]-150)
-				node_group.links.new(get_mix_node_outputs(matte_sub_mix_node), matte_mix_node.inputs[0])
-				node_group.links.new(transform_node.outputs[0], get_mix_node_inputs(matte_mix_node, 2))
+			if not set_matte_node:
+				set_matte_node = node_group.nodes.new('CompositorNodeSetAlpha')
+				set_matte_node.name = f'{self.matte}.Set_Matte'
+				set_matte_node.parent = matte_frame
+				set_matte_node.location = (mix_node.location[0], mix_node.location[1]-150)
+				node_group.links.new(get_mix_node_outputs(matte_sub_mix_node), set_matte_node.inputs[1])
+				node_group.links.new(transform_node.outputs[0], set_matte_node.inputs[0])
+
 			if not matte_math_node:
 				matte_math_node = node_group.nodes.new('CompositorNodeMath')
 				matte_math_node.name = f'{self.matte}.Mask_Mix'
@@ -85,7 +85,8 @@ class Matte_Props(bpy.types.PropertyGroup):
 			else:
 				node_group.links.new(matte_node.outputs['Alpha'], invert_node.inputs['Color'])
 			get_invert_node_inputs(invert_node, 'Color', self.matte_invert)
-			node_group.links.new(get_mix_node_outputs(matte_mix_node), matte_node.inputs[0])
+			node_group.links.new(set_matte_node.outputs[0], matte_node.inputs[0])
+
 		else:
 			if matte_node:
 				node_group.nodes.remove(matte_node)

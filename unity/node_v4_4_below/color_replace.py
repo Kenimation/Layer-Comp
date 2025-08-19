@@ -2,9 +2,9 @@ import bpy
 from ..node import *
 from ._utils import *
 
-class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_Node):
-	bl_name='CompositorNodeReplaceColor'
-	bl_label='Replace Color'
+class CompositorNodeColorReplace(bpy.types.CompositorNodeCustomGroup, Node, Key_Node):
+	bl_name='CompositorNodeColorReplace'
+	bl_label='Color Replace'
 	bl_icon='OVERLAY'
 
 	def update_count(self, context):
@@ -103,112 +103,114 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		color1_panel = node_tree.interface.new_panel("Color1")
 		#Socket Key Color
 		key_color_socket = node_tree.interface.new_socket(name = "Key Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color1_panel)
-		key_color_socket.default_value = (0.92,0,0.059,1)
+		key_color_socket.default_value = (1.0, 0.0, 0.0, 1.0)
 		key_color_socket.attribute_domain = 'POINT'
 
 		#Socket Replace Color
 		replace_color_socket = node_tree.interface.new_socket(name = "Replace Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color1_panel)
-		replace_color_socket.default_value = (0, 0.456, 0.9, 1.0)
+		replace_color_socket.default_value = (0.0, 0.2650200128555298, 1.0, 1.0)
 		replace_color_socket.attribute_domain = 'POINT'
 		replace_color_socket.description = "Value of the first color input"
 
 
 		#Panel Color2
-		color2_panel = node_tree.interface.new_panel("Color2", default_closed=True)
+		color2_panel = node_tree.interface.new_panel("Color2")
 		#Socket Key Color
 		key_color_socket_1 = node_tree.interface.new_socket(name = "Key Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color2_panel)
-		key_color_socket_1.default_value = (0.92,0,0.059,1)
+		key_color_socket_1.default_value = (1.0, 0.0, 0.0, 1.0)
 		key_color_socket_1.attribute_domain = 'POINT'
 
 		#Socket Replace Color
 		replace_color_socket_1 = node_tree.interface.new_socket(name = "Replace Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color2_panel)
-		replace_color_socket_1.default_value = (0, 0.456, 0.9, 1.0)
+		replace_color_socket_1.default_value = (0.0, 0.2650200128555298, 1.0, 1.0)
 		replace_color_socket_1.attribute_domain = 'POINT'
 		replace_color_socket_1.description = "Value of the first color input"
 
 
 		#Panel Color3
-		color3_panel = node_tree.interface.new_panel("Color3", default_closed=True)
+		color3_panel = node_tree.interface.new_panel("Color3")
 		#Socket Key Color
 		key_color_socket_2 = node_tree.interface.new_socket(name = "Key Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color3_panel)
-		key_color_socket_2.default_value = (0.92,0,0.059,1)
+		key_color_socket_2.default_value = (1.0, 0.0, 0.0, 1.0)
 		key_color_socket_2.attribute_domain = 'POINT'
 
 		#Socket Replace Color
 		replace_color_socket_2 = node_tree.interface.new_socket(name = "Replace Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color3_panel)
-		replace_color_socket_2.default_value = (0, 0.456, 0.9, 1.0)
+		replace_color_socket_2.default_value = (0.0, 0.2650200128555298, 1.0, 1.0)
 		replace_color_socket_2.attribute_domain = 'POINT'
 		replace_color_socket_2.description = "Value of the first color input"
 
 
 		#Panel Color4
-		color4_panel = node_tree.interface.new_panel("Color4", default_closed=True)
+		color4_panel = node_tree.interface.new_panel("Color4")
 		#Socket Key Color
 		key_color_socket_3 = node_tree.interface.new_socket(name = "Key Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color4_panel)
-		key_color_socket_3.default_value = (0.92,0,0.059,1)
+		key_color_socket_3.default_value = (1.0, 0.0, 0.0, 1.0)
 		key_color_socket_3.attribute_domain = 'POINT'
 
 		#Socket Replace Color
 		replace_color_socket_3 = node_tree.interface.new_socket(name = "Replace Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color4_panel)
-		replace_color_socket_3.default_value = (0, 0.456, 0.9, 1.0)
+		replace_color_socket_3.default_value = (0.0, 0.2650200128555298, 1.0, 1.0)
 		replace_color_socket_3.attribute_domain = 'POINT'
 		replace_color_socket_3.description = "Value of the first color input"
 
 
 		#Panel Color5
-		color5_panel = node_tree.interface.new_panel("Color5", default_closed=True)
+		color5_panel = node_tree.interface.new_panel("Color5")
 		#Socket Key Color
 		key_color_socket_4 = node_tree.interface.new_socket(name = "Key Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color5_panel)
-		key_color_socket_4.default_value = (0.92,0,0.059,1)
+		key_color_socket_4.default_value = (1.0, 0.0, 0.0, 1.0)
 		key_color_socket_4.attribute_domain = 'POINT'
 
 		#Socket Replace Color
 		replace_color_socket_4 = node_tree.interface.new_socket(name = "Replace Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color5_panel)
-		replace_color_socket_4.default_value = (0, 0.456, 0.9, 1.0)
+		replace_color_socket_4.default_value = (0.0, 0.2650200128555298, 1.0, 1.0)
 		replace_color_socket_4.attribute_domain = 'POINT'
 		replace_color_socket_4.description = "Value of the first color input"
 
 
 		#Panel Color6
-		color6_panel = node_tree.interface.new_panel("Color6", default_closed=True)
+		color6_panel = node_tree.interface.new_panel("Color6")
 		#Socket Key Color
 		key_color_socket_5 = node_tree.interface.new_socket(name = "Key Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color6_panel)
-		key_color_socket_5.default_value = (0.92,0,0.059,1)
+		key_color_socket_5.default_value = (1.0, 0.0, 0.0, 1.0)
 		key_color_socket_5.attribute_domain = 'POINT'
 
 		#Socket Replace Color
 		replace_color_socket_5 = node_tree.interface.new_socket(name = "Replace Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color6_panel)
-		replace_color_socket_5.default_value = (0, 0.456, 0.9, 1.0)
+		replace_color_socket_5.default_value = (0.0, 0.2650200128555298, 1.0, 1.0)
 		replace_color_socket_5.attribute_domain = 'POINT'
 		replace_color_socket_5.description = "Value of the first color input"
 
 
 		#Panel Color7
-		color7_panel = node_tree.interface.new_panel("Color7", default_closed=True)
+		color7_panel = node_tree.interface.new_panel("Color7")
 		#Socket Key Color
 		key_color_socket_6 = node_tree.interface.new_socket(name = "Key Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color7_panel)
-		key_color_socket_6.default_value = (0.92,0,0.059,1)
+		key_color_socket_6.default_value = (1.0, 0.0, 0.0, 1.0)
 		key_color_socket_6.attribute_domain = 'POINT'
 
 		#Socket Replace Color
 		replace_color_socket_6 = node_tree.interface.new_socket(name = "Replace Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color7_panel)
-		replace_color_socket_6.default_value = (0, 0.456, 0.9, 1.0)
+		replace_color_socket_6.default_value = (0.0, 0.2650200128555298, 1.0, 1.0)
 		replace_color_socket_6.attribute_domain = 'POINT'
 		replace_color_socket_6.description = "Value of the first color input"
 
 
 		#Panel Color8
-		color8_panel = node_tree.interface.new_panel("Color8", default_closed=True)
+		color8_panel = node_tree.interface.new_panel("Color8")
 		#Socket Key Color
 		key_color_socket_7 = node_tree.interface.new_socket(name = "Key Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color8_panel)
-		key_color_socket_7.default_value = (0.92,0,0.059,1)
+		key_color_socket_7.default_value = (1.0, 0.0, 0.0, 1.0)
 		key_color_socket_7.attribute_domain = 'POINT'
 
 		#Socket Replace Color
 		replace_color_socket_7 = node_tree.interface.new_socket(name = "Replace Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color8_panel)
-		replace_color_socket_7.default_value = (0, 0.456, 0.9, 1.0)
+		replace_color_socket_7.default_value = (0.0, 0.2650200128555298, 1.0, 1.0)
 		replace_color_socket_7.attribute_domain = 'POINT'
 		replace_color_socket_7.description = "Value of the first color input"
+
+
 
 		#initialize node_tree nodes
 		#node Group Output
@@ -223,9 +225,9 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Color Key
 		color_key = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key.name = "Color Key"
-		color_key.color_hue = 0.15
-		color_key.color_saturation = 0.15
-		color_key.color_value = 0.15
+		color_key.color_hue = 0.10000000149011612
+		color_key.color_saturation = 0.10000000149011612
+		color_key.color_value = 0.10000000149011612
 
 		#node Alpha
 		alpha = node_tree.nodes.new("CompositorNodeMixRGB")
@@ -250,9 +252,9 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Color Key.001
 		color_key_001 = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key_001.name = "Color Key.001"
-		color_key_001.color_hue = 0.15
-		color_key_001.color_saturation = 0.15
-		color_key_001.color_value = 0.15
+		color_key_001.color_hue = 0.10000000149011612
+		color_key_001.color_saturation = 0.10000000149011612
+		color_key_001.color_value = 0.10000000149011612
 
 		#node Alpha.002
 		alpha_002 = node_tree.nodes.new("CompositorNodeMath")
@@ -269,9 +271,9 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Color Key.002
 		color_key_002 = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key_002.name = "Color Key.002"
-		color_key_002.color_hue = 0.15
-		color_key_002.color_saturation = 0.15
-		color_key_002.color_value = 0.15
+		color_key_002.color_hue = 0.10000000149011612
+		color_key_002.color_saturation = 0.10000000149011612
+		color_key_002.color_value = 0.10000000149011612
 
 		#node Alpha.003
 		alpha_003 = node_tree.nodes.new("CompositorNodeMath")
@@ -295,9 +297,9 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Color Key.003
 		color_key_003 = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key_003.name = "Color Key.003"
-		color_key_003.color_hue = 0.15
-		color_key_003.color_saturation = 0.15
-		color_key_003.color_value = 0.15
+		color_key_003.color_hue = 0.10000000149011612
+		color_key_003.color_saturation = 0.10000000149011612
+		color_key_003.color_value = 0.10000000149011612
 
 		#node Alpha.004
 		alpha_004 = node_tree.nodes.new("CompositorNodeMath")
@@ -321,9 +323,9 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Color Key.004
 		color_key_004 = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key_004.name = "Color Key.004"
-		color_key_004.color_hue = 0.15
-		color_key_004.color_saturation = 0.15
-		color_key_004.color_value = 0.15
+		color_key_004.color_hue = 0.10000000149011612
+		color_key_004.color_saturation = 0.10000000149011612
+		color_key_004.color_value = 0.10000000149011612
 
 		#node Alpha.005
 		alpha_005 = node_tree.nodes.new("CompositorNodeMath")
@@ -334,9 +336,9 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Color Key.005
 		color_key_005 = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key_005.name = "Color Key.005"
-		color_key_005.color_hue = 0.15
-		color_key_005.color_saturation = 0.15
-		color_key_005.color_value = 0.15
+		color_key_005.color_hue = 0.10000000149011612
+		color_key_005.color_saturation = 0.10000000149011612
+		color_key_005.color_value = 0.10000000149011612
 
 		#node Alpha.006
 		alpha_006 = node_tree.nodes.new("CompositorNodeMath")
@@ -347,9 +349,9 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Color Key.006
 		color_key_006 = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key_006.name = "Color Key.006"
-		color_key_006.color_hue = 0.15
-		color_key_006.color_saturation = 0.15
-		color_key_006.color_value = 0.15
+		color_key_006.color_hue = 0.10000000149011612
+		color_key_006.color_saturation = 0.10000000149011612
+		color_key_006.color_value = 0.10000000149011612
 
 		#node Alpha.007
 		alpha_007 = node_tree.nodes.new("CompositorNodeMath")
@@ -360,9 +362,9 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Color Key.007
 		color_key_007 = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key_007.name = "Color Key.007"
-		color_key_007.color_hue = 0.15
-		color_key_007.color_saturation = 0.15
-		color_key_007.color_value = 0.15
+		color_key_007.color_hue = 0.10000000149011612
+		color_key_007.color_saturation = 0.10000000149011612
+		color_key_007.color_value = 0.10000000149011612
 
 		#node Alpha.008
 		alpha_008 = node_tree.nodes.new("CompositorNodeMath")
@@ -431,12 +433,85 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		#node Reroute
 		reroute = node_tree.nodes.new("NodeReroute")
 		reroute.name = "Reroute"
+		reroute.socket_idname = "NodeSocketFloat"
+
+		#Set locations
+		group_output.location = (2584.32080078125, -924.9249877929688)
+		group_input.location = (-325.8885192871094, 0.0)
+		color_key.location = (-42.03734588623047, 11.316295623779297)
+		alpha.location = (421.4525146484375, 83.5213623046875)
+		alpha_001.location = (180.302490234375, -4.6454176902771)
+		mix_002.location = (682.9976196289062, -50.94557189941406)
+		color_key_001.location = (-32.93232727050781, -219.41566467285156)
+		alpha_002.location = (180.54991149902344, -201.98194885253906)
+		math_002.location = (679.3096313476562, -307.3265380859375)
+		color_key_002.location = (-30.521018981933594, -453.9954528808594)
+		alpha_003.location = (185.1234130859375, -417.350830078125)
+		mix_003.location = (942.2559204101562, -228.4564208984375)
+		math_003.location = (943.3591918945312, -480.7840576171875)
+		color_key_003.location = (-28.56441307067871, -659.3790283203125)
+		alpha_004.location = (190.708251953125, -620.5457153320312)
+		math_004.location = (1188.4066162109375, -627.13818359375)
+		mix_004.location = (1179.1033935546875, -292.4670715332031)
+		color_key_004.location = (-17.675668716430664, -863.0944213867188)
+		alpha_005.location = (201.59698486328125, -824.2611694335938)
+		color_key_005.location = (-14.564595222473145, -1088.5810546875)
+		alpha_006.location = (202.22508239746094, -1037.334716796875)
+		color_key_006.location = (-14.564595222473145, -1302.0894775390625)
+		alpha_007.location = (204.7080535888672, -1263.2562255859375)
+		color_key_007.location = (-8.19024658203125, -1525.1263427734375)
+		alpha_008.location = (217.86558532714844, -1537.1595458984375)
+		mix_005.location = (1396.7630615234375, -370.9894104003906)
+		mix_006.location = (1591.1920166015625, -420.9679260253906)
+		mix_007.location = (1823.34619140625, -560.2403564453125)
+		mix_008.location = (2112.177978515625, -721.5086059570312)
+		math_005.location = (1394.4930419921875, -686.7207641601562)
+		math_006.location = (1608.0283203125, -753.7512817382812)
+		math_007.location = (1838.9443359375, -865.4688110351562)
+		math_008.location = (2102.0048828125, -975.5089721679688)
+		separate_color.location = (-38.54753494262695, 237.33021545410156)
+		reroute.location = (116.9259033203125, 20.758174896240234)
+
+		#Set dimensions
+		group_output.width, group_output.height = 140.0, 100.0
+		group_input.width, group_input.height = 140.0, 100.0
+		color_key.width, color_key.height = 140.0, 100.0
+		alpha.width, alpha.height = 140.0, 100.0
+		alpha_001.width, alpha_001.height = 140.0, 100.0
+		mix_002.width, mix_002.height = 140.0, 100.0
+		color_key_001.width, color_key_001.height = 140.0, 100.0
+		alpha_002.width, alpha_002.height = 140.0, 100.0
+		math_002.width, math_002.height = 140.0, 100.0
+		color_key_002.width, color_key_002.height = 140.0, 100.0
+		alpha_003.width, alpha_003.height = 140.0, 100.0
+		mix_003.width, mix_003.height = 140.0, 100.0
+		math_003.width, math_003.height = 140.0, 100.0
+		color_key_003.width, color_key_003.height = 140.0, 100.0
+		alpha_004.width, alpha_004.height = 140.0, 100.0
+		math_004.width, math_004.height = 140.0, 100.0
+		mix_004.width, mix_004.height = 140.0, 100.0
+		color_key_004.width, color_key_004.height = 140.0, 100.0
+		alpha_005.width, alpha_005.height = 140.0, 100.0
+		color_key_005.width, color_key_005.height = 140.0, 100.0
+		alpha_006.width, alpha_006.height = 140.0, 100.0
+		color_key_006.width, color_key_006.height = 140.0, 100.0
+		alpha_007.width, alpha_007.height = 140.0, 100.0
+		color_key_007.width, color_key_007.height = 140.0, 100.0
+		alpha_008.width, alpha_008.height = 140.0, 100.0
+		mix_005.width, mix_005.height = 140.0, 100.0
+		mix_006.width, mix_006.height = 140.0, 100.0
+		mix_007.width, mix_007.height = 140.0, 100.0
+		mix_008.width, mix_008.height = 140.0, 100.0
+		math_005.width, math_005.height = 140.0, 100.0
+		math_006.width, math_006.height = 140.0, 100.0
+		math_007.width, math_007.height = 140.0, 100.0
+		math_008.width, math_008.height = 140.0, 100.0
+		separate_color.width, separate_color.height = 140.0, 100.0
+		reroute.width, reroute.height = 8.0, 100.0
 
 		#initialize node_tree links
 		#group_input.Image -> color_key.Image
 		node_tree.links.new(group_input.outputs[0], color_key.inputs[0])
-		#group_input.Key Color -> color_key.Key Color
-		node_tree.links.new(group_input.outputs[1], color_key.inputs[1])
 		#group_input.Key Color -> color_key_001.Key Color
 		node_tree.links.new(group_input.outputs[3], color_key_001.inputs[1])
 		#group_input.Image -> color_key_001.Image
@@ -465,8 +540,6 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		node_tree.links.new(group_input.outputs[15], color_key_007.inputs[1])
 		#group_input.Image -> color_key_007.Image
 		node_tree.links.new(group_input.outputs[0], color_key_007.inputs[0])
-		#color_key.Image -> alpha.Image
-		node_tree.links.new(color_key.outputs[0], alpha.inputs[1])
 		#group_input.Replace Color -> alpha.Image
 		node_tree.links.new(group_input.outputs[2], alpha.inputs[2])
 		#alpha.Image -> mix_002.Image
@@ -579,4 +652,8 @@ class CompositorNodeReplaceColor(bpy.types.CompositorNodeCustomGroup, Node, Key_
 		node_tree.links.new(alpha_008.outputs[0], math_008.inputs[1])
 		#math_008.Value -> group_output.Matte
 		node_tree.links.new(math_008.outputs[0], group_output.inputs[1])
+		#group_input.Image -> alpha.Image
+		node_tree.links.new(group_input.outputs[0], alpha.inputs[1])
+		#group_input.Key Color -> color_key.Key Color
+		node_tree.links.new(group_input.outputs[1], color_key.inputs[1])
 		return node_tree

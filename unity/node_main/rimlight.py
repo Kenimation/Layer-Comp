@@ -1,20 +1,19 @@
 import bpy
 from ..node import *
 
-class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_Node):
-	bl_name='CompositorNodeInnerShadow'
-	bl_label='InnerShadow'
-	bl_icon='SELECT_INTERSECT'
+class CompositorNodeRimLight(bpy.types.CompositorNodeCustomGroup, Node, Mix_Node):
+	bl_name='CompositorNodeRimLight'
+	bl_label='Rim Light'
+	bl_icon='LIGHT_AREA'
 
 	def init(self, context):
 		self.getNodetree(context)
-		self.inputs[1].default_value = (0.003979254048317671, 0.00484081543982029, 0.024766379967331886, 1.0)
+		self.inputs[1].default_value = (1.0, 0.9633176326751709, 0.8549970388412476, 1.0)
 		self.inputs[2].default_value = 0.6108649969100952
 		self.inputs[3].default_value = 5
-		self.inputs[4].default_value = (5.0, 5.0)
-		self.inputs[5].default_value = (1.0, 1.0)
-		self.inputs[6].default_value = 1
-		self.blend_type = 'MULTIPLY'
+		self.inputs[4].default_value = (15.0, 15.0)
+		self.inputs[5].default_value = 1
+		self.blend_type = 'LIGHTEN'
 
 	def draw_buttons(self, context, layout):
 		layout.prop(self, 'blend_type', text='')
@@ -24,7 +23,7 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		ntname = '.*' + self.bl_name + '_nodetree' #blender hides Nodegroups with name '.*'
 		node_tree = self.node_tree = bpy.data.node_groups.new(ntname, 'CompositorNodeTree')
 		node_tree.color_tag = "FILTER"	
-
+		
 		#node_tree interface
 		#Socket Image
 		image_socket = node_tree.interface.new_socket(name = "Image", in_out='OUTPUT', socket_type = 'NodeSocketColor')
@@ -33,15 +32,12 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		image_socket.default_input = 'VALUE'
 		image_socket.structure_type = 'AUTO'
 
-		#Socket Shadow
-		shadow_socket = node_tree.interface.new_socket(name = "Shadow", in_out='OUTPUT', socket_type = 'NodeSocketFloat')
-		shadow_socket.default_value = 0.0
-		shadow_socket.min_value = -3.4028234663852886e+38
-		shadow_socket.max_value = 3.4028234663852886e+38
-		shadow_socket.subtype = 'NONE'
-		shadow_socket.attribute_domain = 'POINT'
-		shadow_socket.default_input = 'VALUE'
-		shadow_socket.structure_type = 'AUTO'
+		#Socket Rim Light
+		rim_light_socket = node_tree.interface.new_socket(name = "Rim Light", in_out='OUTPUT', socket_type = 'NodeSocketColor')
+		rim_light_socket.default_value = (0.0, 0.0, 0.0, 1.0)
+		rim_light_socket.attribute_domain = 'POINT'
+		rim_light_socket.default_input = 'VALUE'
+		rim_light_socket.structure_type = 'AUTO'
 
 		#Socket Image
 		image_socket_1 = node_tree.interface.new_socket(name = "Image", in_out='INPUT', socket_type = 'NodeSocketColor')
@@ -51,12 +47,12 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		image_socket_1.default_input = 'VALUE'
 		image_socket_1.structure_type = 'AUTO'
 
-		#Socket Shadow
-		shadow_socket_1 = node_tree.interface.new_socket(name = "Shadow", in_out='INPUT', socket_type = 'NodeSocketColor')
-		shadow_socket_1.default_value = (0.003979254048317671, 0.00484081543982029, 0.024766379967331886, 1.0)
-		shadow_socket_1.attribute_domain = 'POINT'
-		shadow_socket_1.default_input = 'VALUE'
-		shadow_socket_1.structure_type = 'AUTO'
+		#Socket Rim Light
+		rim_light_socket_1 = node_tree.interface.new_socket(name = "Rim Light", in_out='INPUT', socket_type = 'NodeSocketColor')
+		rim_light_socket_1.default_value = (1.0, 0.9633176326751709, 0.8549970388412476, 1.0)
+		rim_light_socket_1.attribute_domain = 'POINT'
+		rim_light_socket_1.default_input = 'VALUE'
+		rim_light_socket_1.structure_type = 'AUTO'
 
 		#Socket Angle
 		angle_socket = node_tree.interface.new_socket(name = "Angle", in_out='INPUT', socket_type = 'NodeSocketFloat')
@@ -70,7 +66,7 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 
 		#Socket Distance
 		distance_socket = node_tree.interface.new_socket(name = "Distance", in_out='INPUT', socket_type = 'NodeSocketFloat')
-		distance_socket.default_value = 5
+		distance_socket.default_value = 5.0
 		distance_socket.min_value = 0.0
 		distance_socket.max_value = 10000.0
 		distance_socket.subtype = 'NONE'
@@ -80,7 +76,7 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 
 		#Socket Blur Size
 		blur_size_socket = node_tree.interface.new_socket(name = "Blur Size", in_out='INPUT', socket_type = 'NodeSocketVector')
-		blur_size_socket.default_value = (5.0, 5.0, 0.0)
+		blur_size_socket.default_value = (15.0, 15.0, 0.0)
 		blur_size_socket.min_value = 0.0
 		blur_size_socket.max_value = 3.4028234663852886e+38
 		blur_size_socket.subtype = 'NONE'
@@ -88,17 +84,6 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		blur_size_socket.default_input = 'VALUE'
 		blur_size_socket.structure_type = 'AUTO'
 		blur_size_socket.dimensions = 2
-
-		#Socket Scale
-		scale_socket = node_tree.interface.new_socket(name = "Scale", in_out='INPUT', socket_type = 'NodeSocketVector')
-		scale_socket.default_value = (1.0, 1.0, 0.0)
-		scale_socket.min_value = 0.0
-		scale_socket.max_value = 2.0
-		scale_socket.subtype = 'FACTOR'
-		scale_socket.attribute_domain = 'POINT'
-		scale_socket.default_input = 'VALUE'
-		scale_socket.structure_type = 'AUTO'
-		scale_socket.dimensions = 2
 
 		#Socket Opacity
 		opacity_socket = node_tree.interface.new_socket(name = "Opacity", in_out='INPUT', socket_type = 'NodeSocketFloat')
@@ -109,6 +94,24 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		opacity_socket.attribute_domain = 'POINT'
 		opacity_socket.default_input = 'VALUE'
 		opacity_socket.structure_type = 'AUTO'
+
+		#Socket Fill
+		fill_socket = node_tree.interface.new_socket(name = "Fill", in_out='INPUT', socket_type = 'NodeSocketFloat')
+		fill_socket.default_value = 0.0
+		fill_socket.min_value = 0.0
+		fill_socket.max_value = 1.0
+		fill_socket.subtype = 'FACTOR'
+		fill_socket.attribute_domain = 'POINT'
+		fill_socket.default_input = 'VALUE'
+		fill_socket.structure_type = 'AUTO'
+
+		#Socket Color
+		color_socket = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor')
+		color_socket.default_value = (0.0, 0.0, 0.0, 1.0)
+		color_socket.attribute_domain = 'POINT'
+		color_socket.description = "Value of the second color input"
+		color_socket.default_input = 'VALUE'
+		color_socket.structure_type = 'AUTO'
 
 
 		#initialize node_tree nodes
@@ -201,17 +204,10 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		#Value_001
 		math_005.inputs[1].default_value = 5.0
 
-		#node DropShadow
-		dropshadow = node_tree.nodes.new("ShaderNodeVectorMath")
-		dropshadow.name = "DropShadow"
-		dropshadow.operation = 'MULTIPLY'
-		#Vector_001
-		dropshadow.inputs[1].default_value = (5.0, 5.0, 0.0)
-
 		#node Mix
 		mix = node_tree.nodes.new("ShaderNodeMix")
 		mix.name = "Mix"
-		mix.blend_type = 'MULTIPLY'
+		mix.blend_type = 'LIGHTEN'
 		mix.clamp_factor = True
 		mix.clamp_result = False
 		mix.data_type = 'RGBA'
@@ -226,16 +222,29 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		set_alpha.name = "Set Alpha"
 		set_alpha.mode = 'APPLY'
 
-		#node Scale
-		scale = node_tree.nodes.new("CompositorNodeScale")
-		scale.name = "Scale"
-		scale.frame_method = 'STRETCH'
-		scale.interpolation = 'BILINEAR'
-		scale.space = 'RELATIVE'
+		#node Mix.002
+		mix_002 = node_tree.nodes.new("ShaderNodeMix")
+		mix_002.name = "Mix.002"
+		mix_002.blend_type = 'MIX'
+		mix_002.clamp_factor = True
+		mix_002.clamp_result = False
+		mix_002.data_type = 'RGBA'
+		mix_002.factor_mode = 'UNIFORM'
 
-		#node Separate XYZ
-		separate_xyz = node_tree.nodes.new("ShaderNodeSeparateXYZ")
-		separate_xyz.name = "Separate XYZ"
+		#node Set Alpha.001
+		set_alpha_001 = node_tree.nodes.new("CompositorNodeSetAlpha")
+		set_alpha_001.name = "Set Alpha.001"
+		set_alpha_001.mode = 'APPLY'
+
+		#node Invert Color
+		invert_color = node_tree.nodes.new("CompositorNodeInvert")
+		invert_color.name = "Invert Color"
+		#Fac
+		invert_color.inputs[0].default_value = 1.0
+		#Invert Color
+		invert_color.inputs[2].default_value = True
+		#Invert Alpha
+		invert_color.inputs[3].default_value = False
 
 		#initialize node_tree links
 		#blur.Image -> translate.Image
@@ -244,14 +253,12 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		node_tree.links.new(mix.outputs[2], group_output.inputs[0])
 		#group_input.Image -> separate_color.Image
 		node_tree.links.new(group_input.outputs[0], separate_color.inputs[0])
-		#dropshadow.Vector -> blur.Size
-		node_tree.links.new(dropshadow.outputs[0], blur.inputs[1])
-		#reroute_002.Output -> group_output.Shadow
-		node_tree.links.new(reroute_002.outputs[0], group_output.inputs[1])
-		#separate_color.Alpha -> mix_001.B
-		node_tree.links.new(separate_color.outputs[3], mix_001.inputs[3])
+		#group_input.Blur Size -> blur.Size
+		node_tree.links.new(group_input.outputs[4], blur.inputs[1])
+		#invert_color.Color -> mix_001.B
+		node_tree.links.new(invert_color.outputs[0], mix_001.inputs[3])
 		#group_input.Opacity -> mix_001.Factor
-		node_tree.links.new(group_input.outputs[6], mix_001.inputs[0])
+		node_tree.links.new(group_input.outputs[5], mix_001.inputs[0])
 		#math_002.Value -> translate.X
 		node_tree.links.new(math_002.outputs[0], translate.inputs[1])
 		#math_004.Value -> translate.Y
@@ -276,28 +283,32 @@ class CompositorNodeInnerShadow(bpy.types.CompositorNodeCustomGroup, Node, Mix_N
 		node_tree.links.new(math_005.outputs[0], reroute_001.inputs[0])
 		#group_input.Distance -> math_005.Value
 		node_tree.links.new(group_input.outputs[3], math_005.inputs[0])
-		#group_input.Blur Size -> dropshadow.Vector
-		node_tree.links.new(group_input.outputs[4], dropshadow.inputs[0])
-		#scale.Image -> blur.Image
-		node_tree.links.new(scale.outputs[0], blur.inputs[0])
-		#set_alpha.Image -> reroute_002.Input
-		node_tree.links.new(set_alpha.outputs[0], reroute_002.inputs[0])
+		#mix_001.Result -> blur.Image
+		node_tree.links.new(mix_001.outputs[0], blur.inputs[0])
 		#translate.Image -> set_alpha.Image
 		node_tree.links.new(translate.outputs[0], set_alpha.inputs[0])
 		#separate_color.Alpha -> set_alpha.Alpha
 		node_tree.links.new(separate_color.outputs[3], set_alpha.inputs[1])
 		#reroute_002.Output -> mix.Factor
 		node_tree.links.new(reroute_002.outputs[0], mix.inputs[0])
-		#group_input.Image -> mix.A
-		node_tree.links.new(group_input.outputs[0], mix.inputs[6])
-		#group_input.Shadow -> mix.B
+		#group_input.Image -> mix_002.A
+		node_tree.links.new(group_input.outputs[0], mix_002.inputs[6])
+		#group_input.Fill -> mix_002.Factor
+		node_tree.links.new(group_input.outputs[6], mix_002.inputs[0])
+		#group_input.Color -> mix_002.B
+		node_tree.links.new(group_input.outputs[7], mix_002.inputs[7])
+		#set_alpha.Image -> reroute_002.Input
+		node_tree.links.new(set_alpha.outputs[0], reroute_002.inputs[0])
+		#set_alpha_001.Image -> group_output.Rim Light
+		node_tree.links.new(set_alpha_001.outputs[0], group_output.inputs[1])
+		#reroute_002.Output -> set_alpha_001.Image
+		node_tree.links.new(reroute_002.outputs[0], set_alpha_001.inputs[0])
+		#set_alpha.Image -> set_alpha_001.Alpha
+		node_tree.links.new(set_alpha.outputs[0], set_alpha_001.inputs[1])
+		#group_input.Rim Light -> mix.B
 		node_tree.links.new(group_input.outputs[1], mix.inputs[7])
-		#mix_001.Result -> scale.Image
-		node_tree.links.new(mix_001.outputs[0], scale.inputs[0])
-		#separate_xyz.X -> scale.X
-		node_tree.links.new(separate_xyz.outputs[0], scale.inputs[1])
-		#separate_xyz.Y -> scale.Y
-		node_tree.links.new(separate_xyz.outputs[1], scale.inputs[2])
-		#group_input.Scale -> separate_xyz.Vector
-		node_tree.links.new(group_input.outputs[5], separate_xyz.inputs[0])
+		#mix_002.Result -> mix.A
+		node_tree.links.new(mix_002.outputs[2], mix.inputs[6])
+		#separate_color.Alpha -> invert_color.Color
+		node_tree.links.new(separate_color.outputs[3], invert_color.inputs[1])
 		return node_tree

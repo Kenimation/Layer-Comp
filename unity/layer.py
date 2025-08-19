@@ -344,7 +344,12 @@ class Add_OT_Layer(bpy.types.Operator):
 		sub_mix_node.parent = frame
 
 		# Create Transform node
-		transform_node = append_node(".*Transform", ".presets", node_group.nodes)
+		__transform = bpy.data.node_groups.get(".*Transform")
+		if not __transform:
+			__transform = create_transform_node_group()
+
+		transform_node = node_group.nodes.new("CompositorNodeGroup")
+		transform_node.node_tree = __transform
 		transform_node.name = f"{source_name}.Transform"
 		transform_node.parent = frame
 

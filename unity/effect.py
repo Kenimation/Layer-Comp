@@ -765,9 +765,13 @@ class COMPOSITOR_MT_add_effects_features_color(CompositorAddMenu, bpy.types.Menu
 		self.operator_add_effect(layout, feature_node_data, "CompositorNodeFill")
 		self.operator_add_effect(layout, feature_node_data, "CompositorNodeSpotFill")
 		self.operator_add_effect(layout, feature_node_data, "CompositorNodeColorSelection")
-		self.operator_add_effect(layout, feature_node_data, "CompositorNodeReplaceColor")
+		self.operator_add_effect(layout, feature_node_data, "CompositorNodeColorReplace")
+		self.operator_add_effect(layout, feature_node_data, "CompositorNodeColorInnerShadow")
+		self.operator_add_effect(layout, feature_node_data, "CompositorNodeColorInnerShadowSingle")
+		self.operator_add_effect(layout, feature_node_data, "CompositorNodeDropShadow")
 		self.operator_add_effect(layout, feature_node_data, "CompositorNodeInnerShadow")
-		self.operator_add_effect(layout, feature_node_data, "CompositorNodeInnerShadowSingle")
+		self.operator_add_effect(layout, feature_node_data, "CompositorNodeRimLight")
+		self.operator_add_effect(layout, feature_node_data, "CompositorNodeOuterGlow")
 		self.operator_add_effect(layout, feature_node_data, "CompositorNodeBoundaryLine")
 		self.operator_add_effect(layout, feature_node_data, "CompositorNodeSeparateRGBA")
 
@@ -786,6 +790,7 @@ class COMPOSITOR_MT_add_effects_features_looks(CompositorAddMenu, bpy.types.Menu
 		if version >= (4, 5, 0):
 			self.operator_add_effect(layout, feature_node_data, "CompositorNodeSwingTilt")
 		self.operator_add_effect(layout, feature_node_data, "CompositorNodeShutterStreak")
+		self.operator_add_effect(layout, feature_node_data, "CompositorNodeHalation")
 		self.operator_add_effect(layout, feature_node_data, "CompositorNodeBlurRGB")
 		if version >= (4, 5, 0):
 			self.operator_add_effect(layout, feature_node_data, "CompositorNodeTwitch")

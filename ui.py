@@ -4,16 +4,17 @@ from .unity import source, compositor, output, layer
 
 class Compositor_Layer:
 	def draw(self, context):
+		layout = self.layout
+		box = layout.box()
+		self.draw_compositor(context, box)
+
+	def draw_compositor(self, context, box):
 		scene = context.scene
 		rd = context.scene.render
 		tree = context.scene.node_tree
 		props = context.scene.compositor_layer_props
 		view_layer = context.view_layer
-
 		addon_prefs = get_addon_preference(context)
-		
-		layout = self.layout
-		box = layout.box()
 
 		row = box.row()
 		sub = row.row()
@@ -21,7 +22,6 @@ class Compositor_Layer:
 
 		if scene.use_nodes == False:
 			box.prop(scene, "use_nodes", text = "Compositor Use Nodes", icon = "NODETREE", toggle = True)
-			box.separator()
 		else:
 			if hasattr(context.space_data, 'shading'):
 				row = row.row()
@@ -110,7 +110,8 @@ class Compositor_Layer:
 									panel_box.label(text="Preset has no effect", icon = "FILEBROWSER")
 					else:
 						xbox.label(text="No Presets", icon = "FILEBROWSER")
-										
+
+
 class NODE_PT_Compositor_Layer(bpy.types.Panel, Compositor_Layer):
 	bl_space_type = 'NODE_EDITOR'
 	bl_region_type = 'UI'

@@ -8,52 +8,38 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 
 	def update_count(self, context):
 		if self.count >= 2:
-			self.node_tree.nodes["Mix.002"].mute = False
 			self.node_tree.nodes["Math.002"].mute = False
 		else:
-			self.node_tree.nodes["Mix.002"].mute = True
 			self.node_tree.nodes["Math.002"].mute = True
 
 		if self.count >= 3:
-			self.node_tree.nodes["Mix.003"].mute = False
 			self.node_tree.nodes["Math.003"].mute = False
 		else:
-			self.node_tree.nodes["Mix.003"].mute = True
 			self.node_tree.nodes["Math.003"].mute = True
 
 		if self.count >= 4:
-			self.node_tree.nodes["Mix.004"].mute = False
 			self.node_tree.nodes["Math.004"].mute = False
 		else:
-			self.node_tree.nodes["Mix.004"].mute = True
 			self.node_tree.nodes["Math.004"].mute = True
 
 		if self.count >= 5:
-			self.node_tree.nodes["Mix.005"].mute = False
 			self.node_tree.nodes["Math.005"].mute = False
 		else:
-			self.node_tree.nodes["Mix.005"].mute = True
 			self.node_tree.nodes["Math.005"].mute = True
 
 		if self.count >= 6:
-			self.node_tree.nodes["Mix.006"].mute = False
 			self.node_tree.nodes["Math.006"].mute = False
 		else:
-			self.node_tree.nodes["Mix.006"].mute = True
 			self.node_tree.nodes["Math.006"].mute = True
 
 		if self.count >= 7:
-			self.node_tree.nodes["Mix.007"].mute = False
 			self.node_tree.nodes["Math.007"].mute = False
 		else:
-			self.node_tree.nodes["Mix.007"].mute = True
 			self.node_tree.nodes["Math.007"].mute = True
 
 		if self.count >= 8:
-			self.node_tree.nodes["Mix.008"].mute = False
 			self.node_tree.nodes["Math.008"].mute = False
 		else:
-			self.node_tree.nodes["Mix.008"].mute = True
 			self.node_tree.nodes["Math.008"].mute = True
 
 	count : bpy.props.IntProperty(default = 1, name = "Count", update = update_count, min=1, max=8)
@@ -80,7 +66,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		#node_tree interface
 		#Socket Image
 		image_socket = node_tree.interface.new_socket(name = "Image", in_out='OUTPUT', socket_type = 'NodeSocketColor')
-		image_socket.default_value = (0.800000011920929, 0.800000011920929, 0.800000011920929, 1.0)
+		image_socket.default_value = (1.0, 1.0, 1.0, 1.0)
 		image_socket.attribute_domain = 'POINT'
 		image_socket.default_input = 'VALUE'
 		image_socket.structure_type = 'AUTO'
@@ -107,7 +93,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color1_panel = node_tree.interface.new_panel("Color1")
 		#Socket Color
 		color_socket = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color1_panel)
-		color_socket.default_value = (0.92,0,0.059,1)
+		color_socket.default_value = (1.0, 0.0, 0.0, 1.0)
 		color_socket.attribute_domain = 'POINT'
 		color_socket.default_input = 'VALUE'
 		color_socket.structure_type = 'AUTO'
@@ -154,7 +140,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color2_panel = node_tree.interface.new_panel("Color2", default_closed=True)
 		#Socket Color
 		color_socket_1 = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color2_panel)
-		color_socket_1.default_value = (0.92,0,0.059,1)
+		color_socket_1.default_value = (1.0, 0.0, 0.0, 1.0)
 		color_socket_1.attribute_domain = 'POINT'
 		color_socket_1.default_input = 'VALUE'
 		color_socket_1.structure_type = 'AUTO'
@@ -201,7 +187,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color3_panel = node_tree.interface.new_panel("Color3", default_closed=True)
 		#Socket Color
 		color_socket_2 = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color3_panel)
-		color_socket_2.default_value = (0.92,0,0.059,1)
+		color_socket_2.default_value = (1.0, 0.0, 0.0, 1.0)
 		color_socket_2.attribute_domain = 'POINT'
 		color_socket_2.default_input = 'VALUE'
 		color_socket_2.structure_type = 'AUTO'
@@ -248,7 +234,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color4_panel = node_tree.interface.new_panel("Color4", default_closed=True)
 		#Socket Color
 		color_socket_3 = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color4_panel)
-		color_socket_3.default_value = (0.92,0,0.059,1)
+		color_socket_3.default_value = (1.0, 0.0, 0.0, 1.0)
 		color_socket_3.attribute_domain = 'POINT'
 		color_socket_3.default_input = 'VALUE'
 		color_socket_3.structure_type = 'AUTO'
@@ -295,7 +281,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color5_panel = node_tree.interface.new_panel("Color5", default_closed=True)
 		#Socket Color
 		color_socket_4 = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color5_panel)
-		color_socket_4.default_value = (0.92,0,0.059,1)
+		color_socket_4.default_value = (1.0, 0.0, 0.0, 1.0)
 		color_socket_4.attribute_domain = 'POINT'
 		color_socket_4.default_input = 'VALUE'
 		color_socket_4.structure_type = 'AUTO'
@@ -342,7 +328,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color6_panel = node_tree.interface.new_panel("Color6", default_closed=True)
 		#Socket Color
 		color_socket_5 = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color6_panel)
-		color_socket_5.default_value = (0.92,0,0.059,1)
+		color_socket_5.default_value = (1.0, 0.0, 0.0, 1.0)
 		color_socket_5.attribute_domain = 'POINT'
 		color_socket_5.default_input = 'VALUE'
 		color_socket_5.structure_type = 'AUTO'
@@ -389,7 +375,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color7_panel = node_tree.interface.new_panel("Color7", default_closed=True)
 		#Socket Color
 		color_socket_6 = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color7_panel)
-		color_socket_6.default_value = (0.92,0,0.059,1)
+		color_socket_6.default_value = (1.0, 0.0, 0.0, 1.0)
 		color_socket_6.attribute_domain = 'POINT'
 		color_socket_6.default_input = 'VALUE'
 		color_socket_6.structure_type = 'AUTO'
@@ -436,7 +422,7 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color8_panel = node_tree.interface.new_panel("Color8", default_closed=True)
 		#Socket Color
 		color_socket_7 = node_tree.interface.new_socket(name = "Color", in_out='INPUT', socket_type = 'NodeSocketColor', parent = color8_panel)
-		color_socket_7.default_value = (0.92,0,0.059,1)
+		color_socket_7.default_value = (1.0, 0.0, 0.0, 1.0)
 		color_socket_7.attribute_domain = 'POINT'
 		color_socket_7.default_input = 'VALUE'
 		color_socket_7.structure_type = 'AUTO'
@@ -494,17 +480,6 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		color_key = node_tree.nodes.new("CompositorNodeColorMatte")
 		color_key.name = "Color Key"
 
-		#node Mix
-		mix = node_tree.nodes.new("ShaderNodeMix")
-		mix.name = "Mix"
-		mix.blend_type = 'MIX'
-		mix.clamp_factor = True
-		mix.clamp_result = False
-		mix.data_type = 'RGBA'
-		mix.factor_mode = 'UNIFORM'
-		#A_Color
-		mix.inputs[6].default_value = (0.0, 0.0, 0.0, 0.0)
-
 		#node Separate Color
 		separate_color = node_tree.nodes.new("CompositorNodeSeparateColor")
 		separate_color.name = "Separate Color"
@@ -532,15 +507,6 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		math_002.name = "Math.002"
 		math_002.operation = 'ADD'
 		math_002.use_clamp = False
-
-		#node Mix.002
-		mix_002 = node_tree.nodes.new("ShaderNodeMix")
-		mix_002.name = "Mix.002"
-		mix_002.blend_type = 'MIX'
-		mix_002.clamp_factor = True
-		mix_002.clamp_result = False
-		mix_002.data_type = 'RGBA'
-		mix_002.factor_mode = 'UNIFORM'
 
 		#node Color Key.002
 		color_key_002 = node_tree.nodes.new("CompositorNodeColorMatte")
@@ -602,15 +568,6 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		alpha_007.operation = 'SUBTRACT'
 		alpha_007.use_clamp = False
 
-		#node Mix.003
-		mix_003 = node_tree.nodes.new("ShaderNodeMix")
-		mix_003.name = "Mix.003"
-		mix_003.blend_type = 'MIX'
-		mix_003.clamp_factor = True
-		mix_003.clamp_result = False
-		mix_003.data_type = 'RGBA'
-		mix_003.factor_mode = 'UNIFORM'
-
 		#node Math.003
 		math_003 = node_tree.nodes.new("ShaderNodeMath")
 		math_003.name = "Math.003"
@@ -623,38 +580,11 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		math_004.operation = 'ADD'
 		math_004.use_clamp = False
 
-		#node Mix.004
-		mix_004 = node_tree.nodes.new("ShaderNodeMix")
-		mix_004.name = "Mix.004"
-		mix_004.blend_type = 'MIX'
-		mix_004.clamp_factor = True
-		mix_004.clamp_result = False
-		mix_004.data_type = 'RGBA'
-		mix_004.factor_mode = 'UNIFORM'
-
-		#node Mix.005
-		mix_005 = node_tree.nodes.new("ShaderNodeMix")
-		mix_005.name = "Mix.005"
-		mix_005.blend_type = 'MIX'
-		mix_005.clamp_factor = True
-		mix_005.clamp_result = False
-		mix_005.data_type = 'RGBA'
-		mix_005.factor_mode = 'UNIFORM'
-
 		#node Math.005
 		math_005 = node_tree.nodes.new("ShaderNodeMath")
 		math_005.name = "Math.005"
 		math_005.operation = 'ADD'
 		math_005.use_clamp = False
-
-		#node Mix.006
-		mix_006 = node_tree.nodes.new("ShaderNodeMix")
-		mix_006.name = "Mix.006"
-		mix_006.blend_type = 'MIX'
-		mix_006.clamp_factor = True
-		mix_006.clamp_result = False
-		mix_006.data_type = 'RGBA'
-		mix_006.factor_mode = 'UNIFORM'
 
 		#node Math.006
 		math_006 = node_tree.nodes.new("ShaderNodeMath")
@@ -662,29 +592,11 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		math_006.operation = 'ADD'
 		math_006.use_clamp = False
 
-		#node Mix.007
-		mix_007 = node_tree.nodes.new("ShaderNodeMix")
-		mix_007.name = "Mix.007"
-		mix_007.blend_type = 'MIX'
-		mix_007.clamp_factor = True
-		mix_007.clamp_result = False
-		mix_007.data_type = 'RGBA'
-		mix_007.factor_mode = 'UNIFORM'
-
 		#node Math.007
 		math_007 = node_tree.nodes.new("ShaderNodeMath")
 		math_007.name = "Math.007"
 		math_007.operation = 'ADD'
 		math_007.use_clamp = False
-
-		#node Mix.008
-		mix_008 = node_tree.nodes.new("ShaderNodeMix")
-		mix_008.name = "Mix.008"
-		mix_008.blend_type = 'MIX'
-		mix_008.clamp_factor = True
-		mix_008.clamp_result = False
-		mix_008.data_type = 'RGBA'
-		mix_008.factor_mode = 'UNIFORM'
 
 		#node Math.008
 		math_008 = node_tree.nodes.new("ShaderNodeMath")
@@ -692,11 +604,16 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		math_008.operation = 'ADD'
 		math_008.use_clamp = False
 
+		#node Set Alpha
+		set_alpha = node_tree.nodes.new("CompositorNodeSetAlpha")
+		set_alpha.name = "Set Alpha"
+		set_alpha.mode = 'APPLY'
+
 		#initialize node_tree links
 		#group_input.Image -> color_key.Image
 		node_tree.links.new(group_input.outputs[0], color_key.inputs[0])
-		#mix_008.Result -> group_output.Image
-		node_tree.links.new(mix_008.outputs[2], group_output.inputs[0])
+		#set_alpha.Image -> group_output.Image
+		node_tree.links.new(set_alpha.outputs[0], group_output.inputs[0])
 		#group_input.Color -> color_key.Key Color
 		node_tree.links.new(group_input.outputs[1], color_key.inputs[1])
 		#group_input.Hue -> color_key.Hue
@@ -711,10 +628,6 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		node_tree.links.new(color_key.outputs[1], alpha.inputs[1])
 		#separate_color.Alpha -> alpha.Value
 		node_tree.links.new(separate_color.outputs[3], alpha.inputs[0])
-		#alpha.Value -> mix.Factor
-		node_tree.links.new(alpha.outputs[0], mix.inputs[0])
-		#group_input.Image -> mix.B
-		node_tree.links.new(group_input.outputs[0], mix.inputs[7])
 		#math_008.Value -> group_output.Matte
 		node_tree.links.new(math_008.outputs[0], group_output.inputs[1])
 		#group_input.Value -> color_key_001.Value
@@ -735,12 +648,6 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		node_tree.links.new(alpha.outputs[0], math_002.inputs[0])
 		#alpha_001.Value -> math_002.Value
 		node_tree.links.new(alpha_001.outputs[0], math_002.inputs[1])
-		#mix.Result -> mix_002.A
-		node_tree.links.new(mix.outputs[2], mix_002.inputs[6])
-		#alpha_001.Value -> mix_002.Factor
-		node_tree.links.new(alpha_001.outputs[0], mix_002.inputs[0])
-		#group_input.Image -> mix_002.B
-		node_tree.links.new(group_input.outputs[0], mix_002.inputs[7])
 		#group_input.Color -> color_key_002.Key Color
 		node_tree.links.new(group_input.outputs[9], color_key_002.inputs[1])
 		#group_input.Hue -> color_key_002.Hue
@@ -825,12 +732,6 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		node_tree.links.new(separate_color.outputs[3], alpha_005.inputs[0])
 		#separate_color.Alpha -> alpha_006.Value
 		node_tree.links.new(separate_color.outputs[3], alpha_006.inputs[0])
-		#mix_002.Result -> mix_003.A
-		node_tree.links.new(mix_002.outputs[2], mix_003.inputs[6])
-		#group_input.Image -> mix_003.B
-		node_tree.links.new(group_input.outputs[0], mix_003.inputs[7])
-		#alpha_002.Value -> mix_003.Factor
-		node_tree.links.new(alpha_002.outputs[0], mix_003.inputs[0])
 		#math_002.Value -> math_003.Value
 		node_tree.links.new(math_002.outputs[0], math_003.inputs[0])
 		#alpha_002.Value -> math_003.Value
@@ -839,50 +740,24 @@ class CompositorNodeColorSelection(bpy.types.CompositorNodeCustomGroup, Node):
 		node_tree.links.new(math_003.outputs[0], math_004.inputs[0])
 		#alpha_003.Value -> math_004.Value
 		node_tree.links.new(alpha_003.outputs[0], math_004.inputs[1])
-		#mix_003.Result -> mix_004.A
-		node_tree.links.new(mix_003.outputs[2], mix_004.inputs[6])
-		#alpha_003.Value -> mix_004.Factor
-		node_tree.links.new(alpha_003.outputs[0], mix_004.inputs[0])
-		#group_input.Image -> mix_004.B
-		node_tree.links.new(group_input.outputs[0], mix_004.inputs[7])
-		#mix_004.Result -> mix_005.A
-		node_tree.links.new(mix_004.outputs[2], mix_005.inputs[6])
-		#group_input.Image -> mix_005.B
-		node_tree.links.new(group_input.outputs[0], mix_005.inputs[7])
-		#alpha_004.Value -> mix_005.Factor
-		node_tree.links.new(alpha_004.outputs[0], mix_005.inputs[0])
 		#math_004.Value -> math_005.Value
 		node_tree.links.new(math_004.outputs[0], math_005.inputs[0])
 		#alpha_004.Value -> math_005.Value
 		node_tree.links.new(alpha_004.outputs[0], math_005.inputs[1])
-		#mix_005.Result -> mix_006.A
-		node_tree.links.new(mix_005.outputs[2], mix_006.inputs[6])
-		#alpha_005.Value -> mix_006.Factor
-		node_tree.links.new(alpha_005.outputs[0], mix_006.inputs[0])
 		#math_005.Value -> math_006.Value
 		node_tree.links.new(math_005.outputs[0], math_006.inputs[0])
 		#alpha_005.Value -> math_006.Value
 		node_tree.links.new(alpha_005.outputs[0], math_006.inputs[1])
-		#group_input.Image -> mix_006.B
-		node_tree.links.new(group_input.outputs[0], mix_006.inputs[7])
-		#mix_006.Result -> mix_007.A
-		node_tree.links.new(mix_006.outputs[2], mix_007.inputs[6])
 		#math_006.Value -> math_007.Value
 		node_tree.links.new(math_006.outputs[0], math_007.inputs[0])
 		#alpha_006.Value -> math_007.Value
 		node_tree.links.new(alpha_006.outputs[0], math_007.inputs[1])
-		#alpha_006.Value -> mix_007.Factor
-		node_tree.links.new(alpha_006.outputs[0], mix_007.inputs[0])
-		#group_input.Image -> mix_007.B
-		node_tree.links.new(group_input.outputs[0], mix_007.inputs[7])
-		#mix_007.Result -> mix_008.A
-		node_tree.links.new(mix_007.outputs[2], mix_008.inputs[6])
 		#math_007.Value -> math_008.Value
 		node_tree.links.new(math_007.outputs[0], math_008.inputs[0])
 		#alpha_007.Value -> math_008.Value
 		node_tree.links.new(alpha_007.outputs[0], math_008.inputs[1])
-		#alpha_007.Value -> mix_008.Factor
-		node_tree.links.new(alpha_007.outputs[0], mix_008.inputs[0])
-		#group_input.Image -> mix_008.B
-		node_tree.links.new(group_input.outputs[0], mix_008.inputs[7])
+		#math_008.Value -> set_alpha.Alpha
+		node_tree.links.new(math_008.outputs[0], set_alpha.inputs[1])
+		#group_input.Image -> set_alpha.Image
+		node_tree.links.new(group_input.outputs[0], set_alpha.inputs[0])
 		return node_tree

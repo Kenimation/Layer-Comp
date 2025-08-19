@@ -16,6 +16,144 @@ def offset_node(node_group, offset_node, type, offset):
 				if node.location[1] >= offset_node.location[1] - 101:
 					node.location[1] = node.location[1] + offset				
 
+def create_transform_node_group():
+    __transform = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = ".*Transform")
+
+    __transform.color_tag = 'NONE'
+    __transform.description = ""
+    __transform.default_group_node_width = 140
+    
+    #__transform interface
+    #Socket Image
+    image_socket = __transform.interface.new_socket(name = "Image", in_out='OUTPUT', socket_type = 'NodeSocketColor')
+    image_socket.default_value = (0.800000011920929, 0.800000011920929, 0.800000011920929, 1.0)
+    image_socket.attribute_domain = 'POINT'
+    image_socket.default_input = 'VALUE'
+    image_socket.structure_type = 'AUTO'
+
+    #Socket Image
+    image_socket_1 = __transform.interface.new_socket(name = "Image", in_out='INPUT', socket_type = 'NodeSocketColor')
+    image_socket_1.default_value = (1.0, 1.0, 1.0, 1.0)
+    image_socket_1.attribute_domain = 'POINT'
+    image_socket_1.hide_value = True
+    image_socket_1.default_input = 'VALUE'
+    image_socket_1.structure_type = 'AUTO'
+
+    #Socket X
+    x_socket = __transform.interface.new_socket(name = "X", in_out='INPUT', socket_type = 'NodeSocketFloat')
+    x_socket.default_value = 0.0
+    x_socket.min_value = -10000.0
+    x_socket.max_value = 10000.0
+    x_socket.subtype = 'NONE'
+    x_socket.attribute_domain = 'POINT'
+    x_socket.default_input = 'VALUE'
+    x_socket.structure_type = 'AUTO'
+
+    #Socket Y
+    y_socket = __transform.interface.new_socket(name = "Y", in_out='INPUT', socket_type = 'NodeSocketFloat')
+    y_socket.default_value = 0.0
+    y_socket.min_value = -10000.0
+    y_socket.max_value = 10000.0
+    y_socket.subtype = 'NONE'
+    y_socket.attribute_domain = 'POINT'
+    y_socket.default_input = 'VALUE'
+    y_socket.structure_type = 'AUTO'
+
+    #Socket Rotate
+    rotate_socket = __transform.interface.new_socket(name = "Rotate", in_out='INPUT', socket_type = 'NodeSocketFloat')
+    rotate_socket.default_value = 0.0
+    rotate_socket.min_value = -10000.0
+    rotate_socket.max_value = 10000.0
+    rotate_socket.subtype = 'ANGLE'
+    rotate_socket.attribute_domain = 'POINT'
+    rotate_socket.default_input = 'VALUE'
+    rotate_socket.structure_type = 'AUTO'
+
+    #Socket X
+    x_socket_1 = __transform.interface.new_socket(name = "X", in_out='INPUT', socket_type = 'NodeSocketFloat')
+    x_socket_1.default_value = 1.0
+    x_socket_1.min_value = 9.999999747378752e-05
+    x_socket_1.max_value = 12000.0
+    x_socket_1.subtype = 'NONE'
+    x_socket_1.attribute_domain = 'POINT'
+    x_socket_1.default_input = 'VALUE'
+    x_socket_1.structure_type = 'AUTO'
+
+    #Socket Y
+    y_socket_1 = __transform.interface.new_socket(name = "Y", in_out='INPUT', socket_type = 'NodeSocketFloat')
+    y_socket_1.default_value = 1.0
+    y_socket_1.min_value = 9.999999747378752e-05
+    y_socket_1.max_value = 12000.0
+    y_socket_1.subtype = 'NONE'
+    y_socket_1.attribute_domain = 'POINT'
+    y_socket_1.default_input = 'VALUE'
+    y_socket_1.structure_type = 'AUTO'
+
+
+    #initialize __transform nodes
+    #node Group Output
+    group_output = __transform.nodes.new("NodeGroupOutput")
+    group_output.name = "Group Output"
+    group_output.is_active_output = True
+
+    #node Group Input
+    group_input = __transform.nodes.new("NodeGroupInput")
+    group_input.name = "Group Input"
+
+    #node Scale
+    scale = __transform.nodes.new("CompositorNodeScale")
+    scale.name = "Scale"
+    scale.frame_method = 'STRETCH'
+    scale.interpolation = 'BILINEAR'
+    scale.space = 'RELATIVE'
+
+    #node Rotate
+    rotate = __transform.nodes.new("CompositorNodeRotate")
+    rotate.name = "Rotate"
+    rotate.filter_type = 'BILINEAR'
+
+    #node Translate
+    translate = __transform.nodes.new("CompositorNodeTranslate")
+    translate.name = "Translate"
+    translate.interpolation = 'NEAREST'
+    translate.wrap_axis = 'NONE'
+
+
+    #Set locations
+    group_output.location = (350.03118896484375, 0.0)
+    group_input.location = (-360.0312194824219, 0.0)
+    scale.location = (-160.03121948242188, 0.6955108642578125)
+    rotate.location = (-4.1747283935546875, -0.6955108642578125)
+    translate.location = (160.03121948242188, -0.6954803466796875)
+
+    #Set dimensions
+    group_output.width, group_output.height = 140.0, 100.0
+    group_input.width, group_input.height = 140.0, 100.0
+    scale.width, scale.height = 140.0, 100.0
+    rotate.width, rotate.height = 140.0, 100.0
+    translate.width, translate.height = 140.0, 100.0
+
+    #initialize __transform links
+    #rotate.Image -> translate.Image
+    __transform.links.new(rotate.outputs[0], translate.inputs[0])
+    #scale.Image -> rotate.Image
+    __transform.links.new(scale.outputs[0], rotate.inputs[0])
+    #translate.Image -> group_output.Image
+    __transform.links.new(translate.outputs[0], group_output.inputs[0])
+    #group_input.Image -> scale.Image
+    __transform.links.new(group_input.outputs[0], scale.inputs[0])
+    #group_input.X -> translate.X
+    __transform.links.new(group_input.outputs[1], translate.inputs[1])
+    #group_input.Y -> translate.Y
+    __transform.links.new(group_input.outputs[2], translate.inputs[2])
+    #group_input.Rotate -> rotate.Degr
+    __transform.links.new(group_input.outputs[3], rotate.inputs[1])
+    #group_input.X -> scale.X
+    __transform.links.new(group_input.outputs[4], scale.inputs[1])
+    #group_input.Y -> scale.Y
+    __transform.links.new(group_input.outputs[5], scale.inputs[2])
+    return __transform
+
 def get_scene_compositor(context):
 	tree = context.scene.node_tree
 	compositor = []

@@ -157,11 +157,14 @@ class Rest_OT_Node(bpy.types.Operator):
 			node_tree = node.id_data
 			props_to_copy = 'bl_idname name location height width'.split(' ')
 
+			reconnections_node = {}
 			reconnections = []
 			mappings = chain.from_iterable([node.inputs, node.outputs])
 			for i in (i for i in mappings if i.is_linked):
 				for L in i.links:
-					reconnections.append([L.from_socket.path_from_id(), L.to_socket.path_from_id()])
+					reconnections_node[L.from_node.name] = L.from_socket.name
+					reconnections_node[L.to_node.name] = L.to_socket.name
+					reconnections.append([L.from_node.name, L.to_node.name])
 
 			props = {j: getattr(node, j) for j in props_to_copy}
 
@@ -182,7 +185,10 @@ class Rest_OT_Node(bpy.types.Operator):
 			new_node.mute = node_mute
 
 			for str_from, str_to in reconnections:
-				connect_sockets(eval(str_from), eval(str_to))
+				print(str_from, str_to)
+				output = reconnections_node[str_from]
+				input = reconnections_node[str_to]
+				node_group.links.new(node_group.nodes[str_from].outputs[output], node_group.nodes[str_to].inputs[input])
 
 			new_node.select = False
 			success_names.append(new_node.name)

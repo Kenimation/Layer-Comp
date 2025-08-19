@@ -337,16 +337,3 @@ class CompositorNodeSpotFill(bpy.types.CompositorNodeCustomGroup, Node, Mix_Node
 		#group_input.Fill -> mix_001.B
 		node_tree.links.new(group_input.outputs[1], mix_001.inputs[7])
 		return node_tree
-
-classes = (
-	CompositorNodeFill,
-	CompositorNodeSpotFill,
-		  )
-
-def register():
-	for cls in classes:
-		bpy.utils.register_class(cls)
-
-def unregister():
-	for cls in classes:
-		bpy.utils.unregister_class(cls)
