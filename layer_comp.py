@@ -185,7 +185,6 @@ class Rest_OT_Node(bpy.types.Operator):
 			new_node.mute = node_mute
 
 			for str_from, str_to in reconnections:
-				print(str_from, str_to)
 				output = reconnections_node[str_from]
 				input = reconnections_node[str_to]
 				node_group.links.new(node_group.nodes[str_from].outputs[output], node_group.nodes[str_to].inputs[input])
