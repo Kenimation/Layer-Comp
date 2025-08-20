@@ -1,6 +1,6 @@
 ![Image](https://imgur.com/CGxHlc4.png)
 
-# Blender Extensions
+# [Blender Extensions](https://extensions.blender.org/add-ons/layer-comp/)
 
 # Layer-based compositing tool for Blender!!! 
 Layer-based compositing tool, similar to After Effects.
