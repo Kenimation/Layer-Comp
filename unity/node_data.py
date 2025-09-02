@@ -49,6 +49,7 @@ effect_node_data["SCALE"] = ['Scale', 'CompositorNodeScale', 'CON_SIZELIKE']
 
 effect_node_data["CORNERPIN"] = ['Corner Pin', 'CompositorNodeCornerPin', 'PINNED']
 effect_node_data["CROP"] = ['Crop', 'CompositorNodeCrop', 'AREA_DOCK']
+effect_node_data["DISPLACE"] = ['Displace', 'CompositorNodeDisplace', 'MOD_DISPLACE']
 effect_node_data["FLIP"] = ['Flip', 'CompositorNodeFlip', 'MOD_MIRROR']
 
 source_node_data = {}
@@ -112,3 +113,7 @@ socket_data = {}
 socket_data['RGBA'] = 'NODE_SOCKET_RGBA'
 socket_data['VALUE'] = 'NODE_SOCKET_FLOAT'
 socket_data['VECTOR'] = 'NODE_SOCKET_VECTOR'
+socket_data['BOOLEAN'] = 'NODE_SOCKET_BOOLEAN'
+socket_data['INT'] = 'NODE_SOCKET_INT'
+socket_data['IMAGE'] = 'NODE_SOCKET_IMAGE'
+socket_data['MENU'] = 'NODE_SOCKET_MENU'

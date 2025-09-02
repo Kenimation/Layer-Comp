@@ -573,9 +573,9 @@ class Remove_OT_Layer(bpy.types.Operator):
 					node_group.links.new(next_input, node_group.nodes.get("Group Input").outputs[0])
 
 		# Remove layer and change index
-		for i, layer in enumerate(compositor.layer):
+		for i, l in enumerate(compositor.layer):
 			if i > self.index:
-				layer.index -= 1
+				l.index -= 1
 
 		# Remove node
 		for node in node_group.nodes:

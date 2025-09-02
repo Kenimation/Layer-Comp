@@ -93,7 +93,6 @@ class Effect_Props(bpy.types.PropertyGroup):
 							items = effect_channel,
 							update = update_effect_channel
 									)
-	link  : bpy.props.BoolProperty(default=False)
 	drag : bpy.props.BoolProperty()
 
 class Add_OT_Effect(bpy.types.Operator):
@@ -663,11 +662,13 @@ class Link_OT_Effect_Layer(bpy.types.Operator):
 	layer : bpy.props.EnumProperty(
 						name = "Layer",
 						items = layer_item,
+						options={'HIDDEN'}
 								)
 
 	socket : bpy.props.EnumProperty(
 						name = "Socket",
 						items = socket_item,
+						options={'HIDDEN'}
 								)
 	
 	index : bpy.props.IntProperty(options={'HIDDEN'})
@@ -690,7 +691,6 @@ class Link_OT_Effect_Layer(bpy.types.Operator):
 		target_layer = compositor.layer[int(self.layer)]
 
 		effect = layer.effect[self.index]
-		effect.link = True
 
 		effect_node = node_group.nodes.get(f'{layer.name}.Effect.{effect.name}')
 		transform_node = node_group.nodes.get(f"{target_layer.name}.Transform")
@@ -729,6 +729,7 @@ class Unlink_OT_Effect_Layer(bpy.types.Operator):
 	socket : bpy.props.EnumProperty(
 						name = "Socket",
 						items = socket_item,
+						options={'HIDDEN'}
 								)
 	
 	index : bpy.props.IntProperty(options={'HIDDEN'})
@@ -738,7 +739,20 @@ class Unlink_OT_Effect_Layer(bpy.types.Operator):
 		return wm.invoke_props_dialog(self)
 
 	def draw(self, context):
+		props = context.scene.compositor_layer_props
+		node_group = bpy.data.node_groups[props.compositor_panel]
+		compositor = node_group.compositor_props
+		layer = compositor.layer[compositor.layer_index]
+		effect = layer.effect[self.index]
+		effect_node = node_group.nodes.get(f'{layer.name}.Effect.{effect.name}')
+
+		for l in node_group.links:
+			if l.to_socket == effect_node.inputs[self.socket]:
+				layer = l.from_node.parent.label
+				break
+
 		layout = self.layout
+		layout.label(text= f"Layer:  {layer}")
 		layout.prop(self, "socket")
 
 	def execute(self, context):
@@ -756,18 +770,6 @@ class Unlink_OT_Effect_Layer(bpy.types.Operator):
 			if l.to_socket == effect_node.inputs[self.socket]:
 				node_group.links.remove(l)
 				break
-
-		is_link = False
-
-		for input in effect_node.inputs:
-			if input == get_inputs(effect_node):
-				continue
-			if input.enabled:
-				if input.is_linked:
-					is_link = True
-					break
-
-		effect.link = is_link
 
 		return {"FINISHED"}
 
@@ -890,6 +892,7 @@ class COMPOSITOR_MT_add_effects_transform(CompositorAddMenu, bpy.types.Menu):
 
 		self.operator_add_effect(layout, effect_node_data, "CORNERPIN")
 		self.operator_add_effect(layout, effect_node_data, "CROP")
+		self.operator_add_effect(layout, effect_node_data, "DISPLACE")
 		self.operator_add_effect(layout, effect_node_data, "FLIP")
 
 class COMPOSITOR_MT_add_effects_features(CompositorAddMenu, bpy.types.Menu):
@@ -1022,14 +1025,35 @@ def draw_effect(self, context, box):
 		move = header.operator("scene.comp_drag_effect", text="", icon='LAYER_ACTIVE' if effect.drag else 'COLLAPSEMENU', emboss = False)
 		move.index = i
 		if panel:
+
+			enable = False
+			is_link = False
+			effect_node = node_group.nodes.get(f'{layer.name}.Effect.{effect.name}')
+
+			for item in effect_node.inputs:
+				if item.enabled and not item.is_linked:
+					enable = True
+					break
+
+			for item in effect_node.inputs:
+				if item == get_inputs(effect_node):
+					continue
+				if item.enabled and item.is_linked:
+					is_link = True
+					break
+				
 			panel.use_property_split = True
 			panel.use_property_decorate = False
 			panel_box = panel.box()
-			row = panel_box.row(align=True)
-			row.operator("scene.comp_link_effect_layer", text="Link Socket", icon='LINKED').index = i
-			sub = row.row(align=True)
-			sub.enabled = effect.link
-			sub.operator("scene.comp_unlink_effect_layer", text="Unlink Socket", icon='UNLINKED').index = i
+			if len(compositor.layer) > 1:
+				row = panel_box.row(align=True)
+				sub = row.row(align=True)
+				sub.enabled = enable
+				sub.operator("scene.comp_link_effect_layer", text="Link Socket", icon='LINKED').index = i
+				sub = row.row(align=True)
+				sub.enabled = is_link
+				sub.operator("scene.comp_unlink_effect_layer", text="Unlink Socket", icon='UNLINKED').index = i
+
 			panel_box.template_node_inputs(node)
 			if len(node.outputs) > 1:
 				sub = panel_box.row()

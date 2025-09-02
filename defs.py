@@ -23,21 +23,18 @@ def create_transform_node_group():
     __transform.description = ""
     __transform.default_group_node_width = 140
     
+
     #__transform interface
     #Socket Image
     image_socket = __transform.interface.new_socket(name = "Image", in_out='OUTPUT', socket_type = 'NodeSocketColor')
     image_socket.default_value = (0.800000011920929, 0.800000011920929, 0.800000011920929, 1.0)
     image_socket.attribute_domain = 'POINT'
-    image_socket.default_input = 'VALUE'
-    image_socket.structure_type = 'AUTO'
 
     #Socket Image
     image_socket_1 = __transform.interface.new_socket(name = "Image", in_out='INPUT', socket_type = 'NodeSocketColor')
     image_socket_1.default_value = (1.0, 1.0, 1.0, 1.0)
     image_socket_1.attribute_domain = 'POINT'
     image_socket_1.hide_value = True
-    image_socket_1.default_input = 'VALUE'
-    image_socket_1.structure_type = 'AUTO'
 
     #Socket X
     x_socket = __transform.interface.new_socket(name = "X", in_out='INPUT', socket_type = 'NodeSocketFloat')
@@ -46,8 +43,6 @@ def create_transform_node_group():
     x_socket.max_value = 10000.0
     x_socket.subtype = 'NONE'
     x_socket.attribute_domain = 'POINT'
-    x_socket.default_input = 'VALUE'
-    x_socket.structure_type = 'AUTO'
 
     #Socket Y
     y_socket = __transform.interface.new_socket(name = "Y", in_out='INPUT', socket_type = 'NodeSocketFloat')
@@ -56,8 +51,6 @@ def create_transform_node_group():
     y_socket.max_value = 10000.0
     y_socket.subtype = 'NONE'
     y_socket.attribute_domain = 'POINT'
-    y_socket.default_input = 'VALUE'
-    y_socket.structure_type = 'AUTO'
 
     #Socket Rotate
     rotate_socket = __transform.interface.new_socket(name = "Rotate", in_out='INPUT', socket_type = 'NodeSocketFloat')
@@ -66,8 +59,6 @@ def create_transform_node_group():
     rotate_socket.max_value = 10000.0
     rotate_socket.subtype = 'ANGLE'
     rotate_socket.attribute_domain = 'POINT'
-    rotate_socket.default_input = 'VALUE'
-    rotate_socket.structure_type = 'AUTO'
 
     #Socket X
     x_socket_1 = __transform.interface.new_socket(name = "X", in_out='INPUT', socket_type = 'NodeSocketFloat')
@@ -76,8 +67,6 @@ def create_transform_node_group():
     x_socket_1.max_value = 12000.0
     x_socket_1.subtype = 'NONE'
     x_socket_1.attribute_domain = 'POINT'
-    x_socket_1.default_input = 'VALUE'
-    x_socket_1.structure_type = 'AUTO'
 
     #Socket Y
     y_socket_1 = __transform.interface.new_socket(name = "Y", in_out='INPUT', socket_type = 'NodeSocketFloat')
@@ -86,8 +75,6 @@ def create_transform_node_group():
     y_socket_1.max_value = 12000.0
     y_socket_1.subtype = 'NONE'
     y_socket_1.attribute_domain = 'POINT'
-    y_socket_1.default_input = 'VALUE'
-    y_socket_1.structure_type = 'AUTO'
 
 
     #initialize __transform nodes
@@ -104,7 +91,6 @@ def create_transform_node_group():
     scale = __transform.nodes.new("CompositorNodeScale")
     scale.name = "Scale"
     scale.frame_method = 'STRETCH'
-    scale.interpolation = 'BILINEAR'
     scale.space = 'RELATIVE'
 
     #node Rotate
@@ -116,6 +102,7 @@ def create_transform_node_group():
     translate = __transform.nodes.new("CompositorNodeTranslate")
     translate.name = "Translate"
     translate.interpolation = 'NEAREST'
+    translate.use_relative = False
     translate.wrap_axis = 'NONE'
 
 
