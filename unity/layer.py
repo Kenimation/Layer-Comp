@@ -545,15 +545,20 @@ class Remove_OT_Layer(bpy.types.Operator):
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
 		compositor = node_group.compositor_props
-		item = compositor.layer[self.index]
+		layer = compositor.layer[self.index]
 
+		layer_matte = {}
+
+		for l in compositor.layer:
+			layer_matte[l.name] = l.matte
+	
 		# Define nodes
-		if node_group.nodes.get(f"{item.name}.GroupInput"):
-			GroupInput = node_group.nodes.get(f"{item.name}.GroupInput")
+		if node_group.nodes.get(f"{layer.name}.GroupInput"):
+			GroupInput = node_group.nodes.get(f"{layer.name}.GroupInput")
 		else:
 			GroupInput = node_group.nodes.get("Group Input")
 			
-		mix_node = node_group.nodes.get(f"{item.name}.Mix")
+		mix_node = node_group.nodes.get(f"{layer.name}.Mix")
 
 		# Connect last layer to the next layer
 		last_layer = compositor.layer[compositor.layer_index-1]
@@ -574,24 +579,28 @@ class Remove_OT_Layer(bpy.types.Operator):
 
 		# Remove node
 		for node in node_group.nodes:
-			if node.parent == node_group.nodes.get(f"{item.name}.Frame"):
-				if node.name.startswith(f"{item.name}.") and not re.match(rf"{item.name}.\d+", node.name) or node.name == item.name:
+			if node.parent == node_group.nodes.get(f"{layer.name}.Frame"):
+				if node.name.startswith(f"{layer.name}.") and not re.match(rf"{layer.name}.\d+", node.name) or node.name == layer.name:
 					node_group.nodes.remove(node)
 
-		if node_group.nodes.get(f"{item.name}.Frame"):
-			node_group.nodes.remove(node_group.nodes.get(f"{item.name}.Frame"))
+		if node_group.nodes.get(f"{layer.name}.Frame"):
+			node_group.nodes.remove(node_group.nodes.get(f"{layer.name}.Frame"))
 		
 		# Check is source socket connected. If not, remove the socket
-		if item.type == "Source":
-			if item.socket:
-				name = f'{item.source}({item.socket})'
+		if layer.type == "Source":
+			if layer.socket:
+				name = f'{layer.source}({layer.socket})'
 			else:
-				name = item.source
+				name = layer.source
 			is_connected = any(link.from_socket.name == name for link in node_group.links)
 			if not is_connected:
 				node_group.interface.remove(item=node_group.interface.items_tree[name])
 
-		item.effect.clear()
+		layer.effect.clear()
+
+		for l in compositor.layer:
+			if layer_matte[l.name] != layer.name:
+				l.matte = layer_matte[l.name]
 
 		compositor.layer.remove(self.index)
 		if compositor.layer_index > 0:
@@ -645,6 +654,11 @@ class Duplicate_OT_Layer(bpy.types.Operator):
 		compositor = node_group.compositor_props
 		layer = compositor.layer[compositor.layer_index]
 
+		layer_matte_set = {}
+
+		for l in compositor.layer:
+			layer_matte_set[l.name] = l.matte
+
 		layer_matte = (layer.matte, layer.matte_type, layer.matte_invert)
 
 		bpy.ops.scene.comp_add_layer(name=layer.source, icon=layer.icon, socket=layer.socket ,type=layer.type)
@@ -690,6 +704,10 @@ class Duplicate_OT_Layer(bpy.types.Operator):
 
 		if feather_node and new_feather_node:
 			convert_node_data(feather_node, new_feather_node)
+
+		for l in compositor.layer:
+			if l.name in layer_matte_set:
+				l.matte = layer_matte_set[l.name]
 
 		bpy.ops.scene.comp_align_node_tree(name=node_group.name)
 
@@ -1022,6 +1040,8 @@ class Drag_OT_Layer(bpy.types.Operator):
 	index: bpy.props.IntProperty(options={'HIDDEN'})
 	step_counter: int = 0
 
+	layer_matte = {}
+
 	mouse_region_x = None
 	mouse_region_y = None
 
@@ -1055,6 +1075,9 @@ class Drag_OT_Layer(bpy.types.Operator):
 
 		if event.type in ('LEFTMOUSE', 'RIGHTMOUSE'):
 			layer.drag = False
+			for l in compositor.layer:
+				l.matte = self.layer_matte[l.name]
+
 			return {'FINISHED'}
 		
 		return {'RUNNING_MODAL'}
@@ -1068,6 +1091,12 @@ class Drag_OT_Layer(bpy.types.Operator):
 		layer.drag = True
 		self.mouse_region_x = event.mouse_region_x
 		self.mouse_region_y = event.mouse_region_y
+
+		self.layer_matte = {}
+
+		for l in compositor.layer:
+			self.layer_matte[l.name] = l.matte
+
 		context.window_manager.modal_handler_add(self)
 		return {'RUNNING_MODAL'}
 

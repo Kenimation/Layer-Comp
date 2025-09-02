@@ -93,7 +93,7 @@ class Effect_Props(bpy.types.PropertyGroup):
 							items = effect_channel,
 							update = update_effect_channel
 									)
-
+	link  : bpy.props.BoolProperty(default=False)
 	drag : bpy.props.BoolProperty()
 
 class Add_OT_Effect(bpy.types.Operator):
@@ -623,6 +623,154 @@ class Copy_OT_Effect(bpy.types.Operator):
 
 		return {"FINISHED"}
 	
+class Link_OT_Effect_Layer(bpy.types.Operator):
+	bl_idname = "scene.comp_link_effect_layer"
+	bl_label = "Link Compositor Effect Layer"
+	bl_description = "Link Compositor Effect Layer"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	def layer_item(self, context):
+		props = context.scene.compositor_layer_props
+		node_group = bpy.data.node_groups[props.compositor_panel]
+		compositor = node_group.compositor_props
+		layer = compositor.layer[compositor.layer_index]
+
+		list = []
+		for i, item in enumerate(compositor.layer):
+			if item.name != layer.name:
+				list.append((str(i), item.name, '', item.icon, i))
+		return list
+	
+	def socket_item(self, context):
+		props = context.scene.compositor_layer_props
+		node_group = bpy.data.node_groups[props.compositor_panel]
+		compositor = node_group.compositor_props
+		layer = compositor.layer[compositor.layer_index]
+		effect = layer.effect[self.index]
+		effect_node = node_group.nodes.get(f'{layer.name}.Effect.{effect.name}')
+
+		list = []
+		i = 0
+		for item in effect_node.inputs:
+			if item.enabled and not item.is_linked:
+				if bpy.app.version >= (4, 5, 0):
+					list.append((item.name, item.name, '', socket_data[item.type], i))
+				elif bpy.app.version < (4, 5, 0):
+					list.append((item.name, item.name, ''))
+				i += 1
+		return list
+
+	layer : bpy.props.EnumProperty(
+						name = "Layer",
+						items = layer_item,
+								)
+
+	socket : bpy.props.EnumProperty(
+						name = "Socket",
+						items = socket_item,
+								)
+	
+	index : bpy.props.IntProperty(options={'HIDDEN'})
+
+	def invoke(self, context, event):
+		wm = context.window_manager
+		return wm.invoke_props_dialog(self)
+
+	def draw(self, context):
+		layout = self.layout
+		layout.prop(self, "layer")
+		layout.prop(self, "socket")
+
+	def execute(self, context):
+		# Define props
+		props = context.scene.compositor_layer_props
+		node_group = bpy.data.node_groups[props.compositor_panel]
+		compositor = node_group.compositor_props
+		layer = compositor.layer[compositor.layer_index]
+		target_layer = compositor.layer[int(self.layer)]
+
+		effect = layer.effect[self.index]
+		effect.link = True
+
+		effect_node = node_group.nodes.get(f'{layer.name}.Effect.{effect.name}')
+		transform_node = node_group.nodes.get(f"{target_layer.name}.Transform")
+
+		node_group.links.new(transform_node.outputs[0], effect_node.inputs[self.socket])
+		return {"FINISHED"}
+
+class Unlink_OT_Effect_Layer(bpy.types.Operator):
+	bl_idname = "scene.comp_unlink_effect_layer"
+	bl_label = "Unlink Compositor Effect Layer"
+	bl_description = "Unlink Compositor Effect Layer"
+	bl_options = {'REGISTER', 'UNDO'}
+
+	def socket_item(self, context):
+		props = context.scene.compositor_layer_props
+		node_group = bpy.data.node_groups[props.compositor_panel]
+		compositor = node_group.compositor_props
+		layer = compositor.layer[compositor.layer_index]
+		effect = layer.effect[self.index]
+		effect_node = node_group.nodes.get(f'{layer.name}.Effect.{effect.name}')
+
+		list = []
+		i = 0
+		for item in effect_node.inputs:
+			if item.enabled and item.is_linked:
+				if item == get_inputs(effect_node):
+					continue
+
+				if bpy.app.version >= (4, 5, 0):
+					list.append((item.name, item.name, '', socket_data[item.type], i))
+				elif bpy.app.version < (4, 5, 0):
+					list.append((item.name, item.name, ''))
+				i += 1
+		return list
+
+	socket : bpy.props.EnumProperty(
+						name = "Socket",
+						items = socket_item,
+								)
+	
+	index : bpy.props.IntProperty(options={'HIDDEN'})
+
+	def invoke(self, context, event):
+		wm = context.window_manager
+		return wm.invoke_props_dialog(self)
+
+	def draw(self, context):
+		layout = self.layout
+		layout.prop(self, "socket")
+
+	def execute(self, context):
+		# Define props
+		props = context.scene.compositor_layer_props
+		node_group = bpy.data.node_groups[props.compositor_panel]
+		compositor = node_group.compositor_props
+		layer = compositor.layer[compositor.layer_index]
+
+		effect = layer.effect[self.index]
+
+		effect_node = node_group.nodes.get(f'{layer.name}.Effect.{effect.name}')
+
+		for l in node_group.links:
+			if l.to_socket == effect_node.inputs[self.socket]:
+				node_group.links.remove(l)
+				break
+
+		is_link = False
+
+		for input in effect_node.inputs:
+			if input == get_inputs(effect_node):
+				continue
+			if input.enabled:
+				if input.is_linked:
+					is_link = True
+					break
+
+		effect.link = is_link
+
+		return {"FINISHED"}
+
 class CompositorAddMenu:
 
 	@classmethod
@@ -877,6 +1025,11 @@ def draw_effect(self, context, box):
 			panel.use_property_split = True
 			panel.use_property_decorate = False
 			panel_box = panel.box()
+			row = panel_box.row(align=True)
+			row.operator("scene.comp_link_effect_layer", text="Link Socket", icon='LINKED').index = i
+			sub = row.row(align=True)
+			sub.enabled = effect.link
+			sub.operator("scene.comp_unlink_effect_layer", text="Unlink Socket", icon='UNLINKED').index = i
 			panel_box.template_node_inputs(node)
 			if len(node.outputs) > 1:
 				sub = panel_box.row()
@@ -900,6 +1053,8 @@ classes = (
 	Move_OT_Effect,
 	Drag_OT_Effect,
 	Copy_OT_Effect,
+	Link_OT_Effect_Layer,
+	Unlink_OT_Effect_Layer,
 	COMPOSITOR_MT_add_effects,
 	COMPOSITOR_MT_add_effects_adjustment,
 	COMPOSITOR_MT_add_effects_filter,

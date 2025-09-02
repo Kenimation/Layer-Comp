@@ -55,11 +55,10 @@ class AddonPreferences(bpy.types.AddonPreferences, AddonPref_Properties):
 		self.draw_preferences(context, col)
 
 	def draw_preferences(self, context, col):
-		layout = self.layout
-		layout.use_property_split = True
-		layout.use_property_decorate = False
+		col.use_property_split = True
+		col.use_property_decorate = False
 
-		row = layout.row()
+		row = col.row()
 
 		box = row.box()
 		box.scale_x= 0.4
@@ -93,7 +92,7 @@ class AddonPreferences(bpy.types.AddonPreferences, AddonPref_Properties):
 		colrow = col.row()
 		colrow.label(text="Effect Presets")
 		colrow.operator("scene.comp_new_effect_preset", text="", icon='ADD', emboss = False)
-		colrow.operator("scene.comp_load_effect_preset", text='', icon = "IMPORT", emboss = False)
+		colrow.operator("scene.comp_load_preset", text='', icon = "IMPORT", emboss = False)
 		colrow.menu("COMPOSITOR_MT_export_presets", text='', icon = "EXPORT")
 
 		presets = get_presets()

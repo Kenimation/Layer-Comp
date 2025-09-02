@@ -20,97 +20,98 @@ class Compositor_Layer:
 		sub = row.row()
 		sub.label(text = "Compositing", icon = "NODE_COMPOSITING")
 
-		if scene.use_nodes == False:
-			box.prop(scene, "use_nodes", text = "Compositor Use Nodes", icon = "NODETREE", toggle = True)
-		else:
-			if hasattr(context.space_data, 'shading'):
-				row = row.row()
-				row.alignment = 'RIGHT'
-				if context.space_data.shading.use_compositor == "DISABLED":
-					row.label(text="Compositor is disabled", icon = "ERROR")
-				elif context.space_data.shading.use_compositor == "CAMERA":
-					row.label(text="(Only works in camera)")
+		if bpy.app.version < (5, 0, 0):
+			if scene.use_nodes == False:
+				box.prop(scene, "use_nodes", text = "Compositor Use Nodes", icon = "NODETREE", toggle = True)
+				return
 
-				row.popover(panel="COMPOSITOR_PT_options", text="", icon='SETTINGS')
+		if hasattr(context.space_data, 'shading'):
+			row = row.row()
+			row.alignment = 'RIGHT'
+			if context.space_data.shading.use_compositor == "DISABLED":
+				row.label(text="Compositor is disabled", icon = "ERROR")
+			elif context.space_data.shading.use_compositor == "CAMERA":
+				row.label(text="(Only works in camera)")
 
-				row = box.row()
-				row.use_property_split = True
-				row.use_property_decorate = False
-				row.prop(context.space_data.shading, "use_compositor", expand = True)
-			else:
-				sub.popover(panel="COMPOSITOR_PT_options", text="", icon='SETTINGS')
-
-			col = box.column()
-			col.use_property_split = True
-			col.use_property_decorate = False
-			row = col.row()
-			row.prop(rd, "compositor_device", text="Device", expand=True)
-			col.prop(rd, "compositor_precision", text="Precision")
+			row.popover(panel="COMPOSITOR_PT_options", text="", icon='SETTINGS')
 
 			row = box.row()
-			row.prop(props, "panel", expand=True)
+			row.use_property_split = True
+			row.use_property_decorate = False
+			row.prop(context.space_data.shading, "use_compositor", expand = True)
+		else:
+			sub.popover(panel="COMPOSITOR_PT_options", text="", icon='SETTINGS')
 
-			if props.panel == 'Source':
-				source.draw_source(self, context, box)
-			elif props.panel == 'Compositor':
-				compositor.draw_compositor(self, context, box)
-				if len(get_scene_compositor(context)) > 0:
-					layer.draw_layer(self, context, box)
-			elif props.panel == 'Output':
-				output.draw_output(self, context, box)
+		col = box.column()
+		col.use_property_split = True
+		col.use_property_decorate = False
+		row = col.row()
+		row.prop(rd, "compositor_device", text="Device", expand=True)
+		col.prop(rd, "compositor_precision", text="Precision")
 
-			if context.area.ui_type == 'CompositorNodeTree':
-				if addon_prefs.active_node_panel:
-					node = context.active_node
-					if node:
-						header, panel = self.layout.panel(idname="Active Node", default_closed=True)
-						header.label(text="Active Node", icon='NODE')
-						header.operator("node.nw_reset_nodes", text="", icon='FILE_REFRESH', emboss = False)
-						if panel:
-							xbox = panel.box()
-							col = xbox.column()
-							col.use_property_split = True
-							col.use_property_decorate = False
-							sub = col.row()
-							sub.enabled = False 
-							sub.prop(node, "name", text = "Name")
-							col.prop(node, "label", text = "Label")
-							xbox.template_node_inputs(node)
-			
-			if addon_prefs.effect_preset_panel:
-				header, panel = self.layout.panel(idname="Effect Presets", default_closed=True)
-				header.label(text="Effect Presets", icon='SHADERFX')
-				header.menu("COMPOSITOR_MT_preset_specials", icon='DOWNARROW_HLT', text="")
-				if panel:
-					xbox = panel.box()
-					col = xbox.column()
-					col.operator("scene.comp_new_effect_preset", text="Create New Preset", icon='ADD')
-					if context.area.ui_type == 'CompositorNodeTree':
-						col.operator("scene.comp_save_effect_preset", text='Save selected as preset', icon = "FILE_TICK")
+		row = box.row()
+		row.prop(props, "panel", expand=True)
 
-					presets = get_presets()
-					if len(presets) > 0:
+		if props.panel == 'Source':
+			source.draw_source(self, context, box)
+		elif props.panel == 'Compositor':
+			compositor.draw_compositor(self, context, box)
+			if len(get_scene_compositor(context)) > 0:
+				layer.draw_layer(self, context, box)
+		elif props.panel == 'Output':
+			output.draw_output(self, context, box)
+
+		if context.area.ui_type == 'CompositorNodeTree':
+			if addon_prefs.active_node_panel:
+				node = context.active_node
+				if node:
+					header, panel = self.layout.panel(idname="Active Node", default_closed=True)
+					header.label(text="Active Node", icon='NODE')
+					header.operator("node.nw_reset_nodes", text="", icon='FILE_REFRESH', emboss = False)
+					if panel:
+						xbox = panel.box()
 						col = xbox.column()
-						for preset in presets:
-							header, panel = col.panel(idname=f"{preset}.presets", default_closed=True)
-							header.label(text=preset)
-							header.operator("scene.comp_remove_preset", text='', icon = "X", emboss=False).name = preset
-							if panel:
-								effects = get_effect_presets(preset)
-								panel_box = panel.box()
-								if len(effects) > 0:
-									sub = panel_box.column()
-									for effect in effects:
-										row = sub.row()
-										row.label(text=effect, icon = "SHADERFX")
-										remove = row.operator("scene.comp_remove_effect_preset", text='', icon = "REMOVE", emboss=False)
-										remove.preset = preset
-										remove.target = effect
-								else:
-									panel_box.label(text="Preset has no effect", icon = "FILEBROWSER")
-					else:
-						xbox.label(text="No Presets", icon = "FILEBROWSER")
+						col.use_property_split = True
+						col.use_property_decorate = False
+						sub = col.row()
+						sub.enabled = False 
+						sub.prop(node, "name", text = "Name")
+						col.prop(node, "label", text = "Label")
+						xbox.template_node_inputs(node)
+		
+		if addon_prefs.effect_preset_panel:
+			header, panel = self.layout.panel(idname="Effect Presets", default_closed=True)
+			header.label(text="Effect Presets", icon='SHADERFX')
+			header.menu("COMPOSITOR_MT_preset_specials", icon='DOWNARROW_HLT', text="")
+			if panel:
+				xbox = panel.box()
+				col = xbox.column()
+				col.operator("scene.comp_new_effect_preset", text="Create New Preset", icon='ADD')
+				if context.area.ui_type == 'CompositorNodeTree':
+					col.operator("scene.comp_save_effect_preset", text='Save selected as preset', icon = "FILE_TICK")
 
+				presets = get_presets()
+				if len(presets) > 0:
+					col = xbox.column()
+					for preset in presets:
+						header, panel = col.panel(idname=f"{preset}.presets", default_closed=True)
+						header.label(text=preset)
+						header.operator("scene.comp_remove_preset", text='', icon = "X", emboss=False).name = preset
+						if panel:
+							effects = get_effect_presets(preset)
+							panel_box = panel.box()
+							if len(effects) > 0:
+								sub = panel_box.column()
+								for effect in effects:
+									row = sub.row()
+									row.label(text=effect, icon = "SHADERFX")
+									remove = row.operator("scene.comp_remove_effect_preset", text='', icon = "REMOVE", emboss=False)
+									remove.preset = preset
+									remove.target = effect
+							else:
+								panel_box.label(text="Preset has no effect", icon = "FILEBROWSER")
+				else:
+					xbox.label(text="No Presets", icon = "FILEBROWSER")
 
 class NODE_PT_Compositor_Layer(bpy.types.Panel, Compositor_Layer):
 	bl_space_type = 'NODE_EDITOR'

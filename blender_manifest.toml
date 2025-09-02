@@ -1,10 +1,10 @@
 schema_version = "1.0.0"
 
 id = "layer_comp"
-version = "1.0.1"
+version = "1.0.2"
 name = "LayerComp"
 tagline = "Layer-based compositing tool, similar to After Effects"
-maintainer = "KEN <kken498@gmail.com>"
+maintainer = "KEN"
 type = "add-on"
 
 tags = [
