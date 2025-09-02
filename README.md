@@ -12,6 +12,7 @@ It's not just simply adding a filter on the screen. You can composite it with AO
 * Support Adjustment Layer and Matte Layer
 * Multiple Mask control for each layer.
 * More than 10+ feature ndoes.
+* Control the effect value with the layer.
 * Copy and paste a layer or effects between two compositor.
 * Dynamic Search Box
 * Save and share your custom effects.
@@ -37,16 +38,20 @@ This addon provides a system and pipeline; it won't provide many more feature no
   
 ![Image](https://i.imgur.com/KhDQYhc.gif)
 
-* Label your layer(version 4.5 or higher)
+* Label your layer(version 4.4 or higher)
 
 ![Image](https://i.imgur.com/gtfdEbH.gif)
 
 # Dynamic Search Box
 ![Image](https://i.imgur.com/8Cce8EO.gif)
 
+# Link socket for the effect
+* Allows you to control the effect value with a layer).
+
+![Image](https://imgur.com/NYiZJwG.png)
+
 # Save and share your custom effects
 * Custom effect requires node group type and one 'Image' input, and at least one output
-
 ![Image](https://i.imgur.com/9CRa0El.gif)
 
 * Load and export your effect presets (Notice, effect presets are .blend files)
@@ -57,7 +62,7 @@ This addon provides a system and pipeline; it won't provide many more feature no
 ![Image](https://i.imgur.com/Wt7tIgx.png)
 
 # Future
-* Add sub-socket for the effect node
+* Save compositor preset
 * Better output system
 
 # Compatibility
