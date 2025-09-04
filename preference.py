@@ -3,7 +3,14 @@ from .defs import *
 
 class AddonPref_Properties:
 	active_node_panel : bpy.props.BoolProperty(default = True, description = "Show active node panel in compositor area.")
-	effect_preset_panel : bpy.props.BoolProperty(default = True, description = "Show effect preset panel.")
+	preset_panel : bpy.props.BoolProperty(default = True, description = "Show effect preset panel.")
+	preset_type : bpy.props.EnumProperty(default = "Effects",
+							items = [('Effects', 'Effects', ''),
+									('Compositors', 'Compositors', ''),
+									],
+							description = "Presets Type"
+									)
+
 	layer_name : bpy.props.EnumProperty(default = "Layer",
 							items = [('Layer', 'Layer', ''),
 									('Source', 'Source', ''),
@@ -55,18 +62,18 @@ class AddonPreferences(bpy.types.AddonPreferences, AddonPref_Properties):
 		self.draw_preferences(context, col)
 
 	def draw_preferences(self, context, col):
-		col.use_property_split = True
-		col.use_property_decorate = False
-
 		row = col.row()
 
 		box = row.box()
+		box.use_property_split = True
+		box.use_property_decorate = False
+
 		box.scale_x= 0.4
 		box.label(text="UI Settings")
 		col = box.column(heading="Panel", align=True)
 		col.prop(self, "view3d", text="3D Viewport Panel")
 		col.prop(self, "active_node_panel", text="Active Node")
-		col.prop(self, "effect_preset_panel", text="Effect Presets")
+		col.prop(self, "preset_panel", text="Presets Panel")
 		col = box.column(heading = "Compositor")
 		col.prop(self, "search", text="Search Box")
 		sub = col.row()
@@ -88,35 +95,37 @@ class AddonPreferences(bpy.types.AddonPreferences, AddonPref_Properties):
 		col.row().prop(self, "duplicate_effect_option", text="Effect", expand = True)
 
 		box = row.box()
-		col = box.column()
-		colrow = col.row()
-		colrow.label(text="Effect Presets")
-		colrow.operator("scene.comp_new_effect_preset", text="", icon='ADD', emboss = False)
-		colrow.operator("scene.comp_load_preset", text='', icon = "IMPORT", emboss = False)
-		colrow.menu("COMPOSITOR_MT_export_presets", text='', icon = "EXPORT")
+		colbox = box.column()
+		row = colbox.row(align=True)
+		row.prop(self, 'preset_type', expand=True)
+		row.menu("COMPOSITOR_MT_preset_specials", icon='DOWNARROW_HLT', text="")
 
-		presets = get_presets()
+		type = self.preset_type
+		
+		presets = get_presets(type)
 		if len(presets) > 0:
-			col = box.column()
+			col = colbox.column()
 			for preset in presets:
 				header, panel = col.panel(idname=f"{preset}.presets", default_closed=True)
 				header.label(text=preset)
-				header.operator("scene.comp_remove_preset", text='', icon = "X", emboss=False).name = preset
+				remove = header.operator("scene.comp_remove_preset", text='', icon = "X", emboss=False)
+				remove.type = type
+				remove.name = preset
 				if panel:
-					effects = get_effect_presets(preset)
+					items = get_presets_item(preset, type)
 					panel_box = panel.box()
-					if len(effects) > 0:
+					if len(items) > 0:
 						sub = panel_box.column()
-						for effect in effects:
+						for item in items:
 							row = sub.row()
-							row.label(text=effect, icon = "SHADERFX")
-							remove = row.operator("scene.comp_remove_effect_preset", text='', icon = "REMOVE", emboss=False)
+							row.label(text=item, icon = "SHADERFX" if type == 'Effects' else "NODE_COMPOSITING")
+							remove = row.operator("scene.comp_remove_preset_item", text='', icon = "REMOVE", emboss=False)
 							remove.preset = preset
-							remove.target = effect
+							remove.target = item
 					else:
-						panel_box.label(text="Preset has no effect", icon = "FILEBROWSER")
+						panel_box.label(text="Preset has item", icon = "FILEBROWSER")
 		else:
-			box.label(text="No Presets", icon = "FILEBROWSER")
+			colbox.label(text="No Presets", icon = "FILEBROWSER")
 
 classes = (
 	AddonPreferences,

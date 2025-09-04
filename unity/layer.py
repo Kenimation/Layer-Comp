@@ -8,6 +8,27 @@ from .mask import *
 from .node_data import *
 
 class Layer_Props(Matte_Props, bpy.types.PropertyGroup):
+	def get_name(self):
+		return self.get("name", "")
+
+	def set_name(self, value):
+		if value == '':
+			value = self.source
+
+		# Define props
+		context = bpy.context
+		tree = get_scene_tree(context)
+		props = context.scene.compositor_layer_props
+		node_group = tree.nodes[props.compositor_panel].node_tree
+		compositor = node_group.compositor_props
+
+		# Check existing layer
+		existing_names = [item.name for item in compositor.layer if item.name != self.sub_name]
+
+		new_name = unique_name(value, existing_names)
+
+		self["name"] = new_name
+
 	def update_name(self, context):
 		props = context.scene.compositor_layer_props
 		node_group = bpy.data.node_groups[props.compositor_panel]
@@ -112,7 +133,7 @@ class Layer_Props(Matte_Props, bpy.types.PropertyGroup):
 			list.append((icon, "", '', icon, index))
 		return list
 
-	name : bpy.props.StringProperty(name='Layer Name', update=update_name)
+	name : bpy.props.StringProperty(name='Layer Name', update=update_name, get=get_name, set=set_name)
 	sub_name : bpy.props.StringProperty()
 	icon : bpy.props.StringProperty()
 	source : bpy.props.StringProperty(name='Source Name', )
@@ -169,7 +190,7 @@ class LAYER_UL_LIST(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, propname, icon, active_data, active_propname, index):
 
 		if self.layout_type in {'DEFAULT'}:
-			tree = context.scene.node_tree
+			tree = get_scene_tree(context)
 			props = context.scene.compositor_layer_props
 			node_group = tree.nodes[props.compositor_panel].node_tree
 			compositor = node_group.compositor_props
@@ -264,7 +285,7 @@ class LAYER_UL_LIST(bpy.types.UIList):
 	def filter_items(self, context, data, propname):
 		"""Filter and sort items in the list"""
 
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
 		compositor = node_group.compositor_props
@@ -301,7 +322,7 @@ class Add_OT_Layer(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
 		compositor = node_group.compositor_props
@@ -403,10 +424,7 @@ class Add_OT_Layer(bpy.types.Operator):
 			input_node = None
 
 		else:
-			if self.type in layer_node_data:
-				input_node = node_group.nodes.new(layer_node_data[self.type][1])
-			elif self.type in texture_node_data:
-				input_node = node_group.nodes.new(texture_node_data[self.type][1])
+			input_node = node_group.nodes.new(self.type)
 			input_node.name = source_name
 			input_node.parent = frame
 			
@@ -461,11 +479,16 @@ class Add_OT_Layer_Socket(bpy.types.Operator):
 	icon : bpy.props.StringProperty(options={'HIDDEN'})
 
 	def invoke(self, context, event):
-		wm = context.window_manager
-		return wm.invoke_props_popup(self, event)
+		tree = get_scene_tree(context)
+		source_node = tree.nodes[self.name]
+		if len(source_node.outputs) > 1:
+			wm = context.window_manager
+			return wm.invoke_props_popup(self, event)
+		else:
+			return self.execute(context)
 
 	def draw(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		source_node = tree.nodes[self.name]
 
 		add = self.layout.operator("scene.comp_add_layer", text=self.name, emboss=False, icon=self.icon)
@@ -492,6 +515,7 @@ class Add_OT_Layer_Socket(bpy.types.Operator):
 				add.type = "Source"
 
 	def execute(self, context):
+		bpy.ops.scene.comp_add_layer(name = self.name, icon = self.icon, type = "Source")
 		return {"FINISHED"}
 
 class Add_OT_Layer_All_Socket(bpy.types.Operator):
@@ -504,7 +528,7 @@ class Add_OT_Layer_All_Socket(bpy.types.Operator):
 	icon : bpy.props.StringProperty(options={'HIDDEN'})
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		source_node = tree.nodes[self.name]
 		for item in source_node.outputs:
 			if item.enabled:
@@ -519,7 +543,7 @@ class Add_OT_Layer_From_Node(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		selected_node = [node for node in tree.nodes if node.select and node.outputs]
 
 		for node in selected_node:
@@ -541,7 +565,7 @@ class Remove_OT_Layer(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
 		compositor = node_group.compositor_props
@@ -720,7 +744,7 @@ class Copy_OT_Layer(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 
 	def compositor_item(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		list = []
 		for i, name in enumerate(get_scene_compositor(context)):
 			node_group = tree.nodes[name].node_tree
@@ -730,7 +754,7 @@ class Copy_OT_Layer(bpy.types.Operator):
 		return list
 	
 	def layer_item(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		node_group = tree.nodes[self.compositor].node_tree
 		compositor = node_group.compositor_props
 		list = []
@@ -761,7 +785,7 @@ class Copy_OT_Layer(bpy.types.Operator):
 			self.report({"INFO"}, "No layer item")
 			return {"FINISHED"}
 		
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		copy_node_group = tree.nodes[self.compositor].node_tree
@@ -880,7 +904,7 @@ class Move_OT_Layer(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = tree.compositor_props
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
@@ -1046,7 +1070,7 @@ class Drag_OT_Layer(bpy.types.Operator):
 	mouse_region_y = None
 
 	def modal(self, context, event):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
 		compositor = node_group.compositor_props
@@ -1083,7 +1107,7 @@ class Drag_OT_Layer(bpy.types.Operator):
 		return {'RUNNING_MODAL'}
 		
 	def invoke(self, context, event):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
 		compositor = node_group.compositor_props
@@ -1127,18 +1151,20 @@ class COMPOSITOR_MT_add_layer(bpy.types.Menu):
 		for item in layer_node_data:
 			if bpy.app.version < (4, 5, 0) and item == "TEX_GRADIENT":
 				continue
-			add = layout.operator("scene.comp_add_layer", text=layer_node_data[item][0], icon=layer_node_data[item][2])
+			add = layout.operator("scene.comp_add_layer", text=layer_node_data[item][0], icon=layer_node_data[item][1])
 			add.name = layer_node_data[item][0]
 			add.type = item
-			add.icon = layer_node_data[item][2]
+			add.icon = layer_node_data[item][1]
+
 		layout.separator()
 		if bpy.app.version >= (4, 5, 0):
 			layout.menu("COMPOSITOR_MT_add_texture_layer", icon = "TEXTURE")
 		elif bpy.app.version < (4, 5, 0):
-			add = layout.operator("scene.comp_add_layer", text=texture_node_data['TEXTURE'][0], icon = "TEXTURE")
-			add.name = texture_node_data['TEXTURE'][0]
-			add.type = 'TEXTURE'
-			add.icon = texture_node_data['TEXTURE'][2]
+			texture = texture_node_data['CompositorNodeTexture']
+			add = layout.operator("scene.comp_add_layer", text=texture[0], icon = "TEXTURE")
+			add.name = texture[0]
+			add.type = 'CompositorNodeTexture'
+			add.icon = texture[1]
 		if context.area.ui_type == 'CompositorNodeTree':
 			layout.separator()
 			layout.operator("scene.comp_add_layer_from_node", text="From Node", icon="NODE")
@@ -1148,7 +1174,7 @@ class COMPOSITOR_MT_add_source_layer(bpy.types.Menu):
 	bl_options = {'SEARCH_ON_KEY_PRESS'}
 
 	def draw(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
 		compositor = node_group.compositor_props
@@ -1179,17 +1205,19 @@ class COMPOSITOR_MT_add_texture_layer(bpy.types.Menu):
 	def draw(self, context):
 		layout = self.layout
 		for item in texture_node_data:
+			if bpy.app.version >= (5, 0, 0) and item == 'CompositorNodeTexture':
+				continue
 			add = layout.operator("scene.comp_add_layer", text=texture_node_data[item][0])
 			add.name = texture_node_data[item][0]
 			add.type = item
-			add.icon = texture_node_data[item][2]
+			add.icon = texture_node_data[item][1]
 
 class COMPOSITOR_MT_layers_specials(bpy.types.Menu):
 	bl_label = "Layer Specials"
 	bl_options = {'SEARCH_ON_KEY_PRESS'}
 
 	def draw(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		node_group = tree.nodes[props.compositor_panel].node_tree
@@ -1208,7 +1236,7 @@ class COMPOSITOR_MT_layers_specials(bpy.types.Menu):
 def draw_layer(self, context, box):
 	addon_prefs = get_addon_preference(context)
 
-	tree = context.scene.node_tree
+	tree = get_scene_tree(context)
 	props = context.scene.compositor_layer_props
 
 	node_group = tree.nodes[props.compositor_panel].node_tree

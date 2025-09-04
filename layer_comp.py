@@ -24,7 +24,7 @@ class Compositing_Layer_Props(bpy.types.PropertyGroup):
 		return list
 	
 	def update_compositor_panel(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		viewer_node = tree.nodes.get("Viewer")
 		group_node = tree.nodes.get(self.compositor_panel)
 		if not viewer_node:

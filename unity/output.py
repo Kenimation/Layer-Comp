@@ -3,6 +3,24 @@ from ..defs import *
 from .node_data import *
 
 class Output_Props(bpy.types.PropertyGroup):
+	def get_name(self):
+		return self.get("name", "")
+
+	def set_name(self, value):
+		if value == '':
+			value = self.type
+
+		# Define props
+		context = bpy.context
+		props = context.scene.compositor_layer_props
+
+		# Check existing layer
+		existing_names = [item.name for item in props.output if item.name != self.sub_name]
+
+		new_name = unique_name(value, existing_names)
+
+		self["name"] = new_name
+
 	def update_name(self, context):
 		node = context.scene.node_tree.nodes.get(self.sub_name)
 		if node:
@@ -20,14 +38,14 @@ class Output_Props(bpy.types.PropertyGroup):
 		return list
 	
 	def update_composite(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		node = tree.nodes.get(self.name)
 		output_node = tree.nodes.get(self.composite)
 		if output_node:
 			output = get_outputs(output_node, None)
 			tree.links.new(output, node.inputs[0])
 
-	name : bpy.props.StringProperty(name='Output Name', update=update_name)
+	name : bpy.props.StringProperty(name='Output Name', update=update_name, get=get_name, set=set_name)
 	sub_name : bpy.props.StringProperty()
 	composite : bpy.props.EnumProperty(
 						name='Composite',
@@ -42,7 +60,7 @@ class OUTPUT_UL_LIST(bpy.types.UIList):
 
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		if self.layout_type in {'DEFAULT'}:
-			tree = context.scene.node_tree
+			tree = get_scene_tree(context)
 			node = tree.nodes[item.name]
 
 			row = layout.row()
@@ -68,7 +86,7 @@ class FILE_OUTPUT_UL_LIST(bpy.types.UIList):
 
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		if self.layout_type in {'DEFAULT'}:
-			tree = context.scene.node_tree
+			tree = get_scene_tree(context)
 
 			props = context.scene.compositor_layer_props
 			output = props.output[props.output_index]
@@ -107,7 +125,7 @@ class Add_OT_Output(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		# Set new output node location next to the last output node
@@ -121,7 +139,7 @@ class Add_OT_Output(bpy.types.Operator):
 		if len(get_scene_compositor(context)) > 0:
 			comp_node = tree.nodes.get(get_scene_compositor(context)[0])
 
-		node = tree.nodes.new(output_node_data[self.type][1])
+		node = tree.nodes.new(self.type)
 		node.name = output_node_data[self.type][0]
 
 		if self.type == 'OUTPUT_FILE':
@@ -131,15 +149,13 @@ class Add_OT_Output(bpy.types.Operator):
 			node.location = (sub_node.location[0],sub_node.location[1]-350)
 		elif comp_node:
 			node.location = (comp_node.location[0]+350,comp_node.location[1])
-		else:
-			node.location = (sub_node.location[0],sub_node.location[1]-350)
 
 		# Set properties
 		item = props.output.add()
 		item.name = node.name
 		item.sub_name = node.name
-		item.type = node.type
-		item.icon = output_node_data[self.type][2]
+		item.type = output_node_data[self.type][0]
+		item.icon = output_node_data[self.type][1]
 
 		props.output_index = len(props.output) - 1
 
@@ -153,7 +169,7 @@ class Reload_OT_Output(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		index = props.output_index
 		data = {}
@@ -164,14 +180,14 @@ class Reload_OT_Output(bpy.types.Operator):
 		props.output.clear()
 
 		for node in tree.nodes:
-			if node.type not in output_node_data:
+			if node.bl_idname not in output_node_data:
 				continue
 
 			item = props.output.add()
 			item.name = node.name
 			item.sub_name = node.name
-			item.type = node.type
-			item.icon = output_node_data[node.type][2]
+			item.type = output_node_data[node.bl_idname][0]
+			item.icon = output_node_data[node.bl_idname][1]
 			if data.get(node.name):
 				item.composite = data[item.name]
 
@@ -188,7 +204,7 @@ class Remove_OT_Output(bpy.types.Operator):
 	index : bpy.props.IntProperty(options={'HIDDEN'})
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		item = props.output[self.index]
@@ -230,12 +246,12 @@ class Add_OT_FileOutput(bpy.types.Operator):
 			return self.execute(context)
 
 	def draw(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		layout = self.layout
 		layout.prop(self, "comp", text="")
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		links = tree.links
 		output = tree.nodes.get(self.name)
 		comp = tree.nodes.get(self.comp)
@@ -258,7 +274,7 @@ class Remove_OT_FileOutput(bpy.types.Operator):
 	index  : bpy.props.IntProperty(options={'HIDDEN'})
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		output = tree.nodes.get(self.name)
 
 		output.file_slots.remove(output.inputs[self.index])
@@ -295,12 +311,12 @@ class Link_OT_FileOutput(bpy.types.Operator):
 			return self.execute(context)
 
 	def draw(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		layout = self.layout
 		layout.prop(self, "comp", text="")
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		links = tree.links
 		output = tree.nodes.get(self.name)
 		comp = tree.nodes.get(self.comp)
@@ -309,7 +325,6 @@ class Link_OT_FileOutput(bpy.types.Operator):
 			links.new(comp.outputs[0], output.inputs[self.index])
 
 		return {'FINISHED'}
-	
 
 class COMPOSITOR_MT_add_output(bpy.types.Menu):
 	bl_label = "Output"
@@ -319,7 +334,7 @@ class COMPOSITOR_MT_add_output(bpy.types.Menu):
 		layout = self.layout
 
 		for data in output_node_data:
-			layout.operator("scene.comp_add_output", text=output_node_data[data][0], icon=output_node_data[data][2]).type = data
+			layout.operator("scene.comp_add_output", text=output_node_data[data][0], icon=output_node_data[data][1]).type = data
 
 def draw_format(layout, props):
 	layout.use_property_split = True
@@ -348,10 +363,14 @@ def draw_format(layout, props):
 			col.prop(props.format.view_settings, "white_balance_tint")
 
 def draw_output(self, context, box):
-	tree = context.scene.node_tree
+	tree = get_scene_tree(context)
 	props = context.scene.compositor_layer_props
 
-	box.operator("wm.call_menu", text="Add Output", icon='ADD').name = "COMPOSITOR_MT_add_output"
+	if bpy.app.version < (5, 0, 0):
+		box.operator("wm.call_menu", text="Add Output", icon='ADD').name = "COMPOSITOR_MT_add_output"
+	else:
+		box.operator("scene.comp_add_output", text="Add Output", icon='ADD').type = 'CompositorNodeOutputFile'
+		
 	box.template_list("OUTPUT_UL_LIST", "", props, "output", props, "output_index")
 	if len(props.output) > 0:
 		item = props.output[props.output_index]

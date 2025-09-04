@@ -1,9 +1,10 @@
 import bpy
+from ..defs import *
 from .node import *
 
 class Matte_Props(bpy.types.PropertyGroup):
 	def matte_item(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		node_group = tree.nodes[props.compositor_panel].node_tree
 		compositor = node_group.compositor_props
@@ -85,7 +86,8 @@ class Matte_Props(bpy.types.PropertyGroup):
 			else:
 				node_group.links.new(matte_node.outputs['Alpha'], invert_node.inputs['Color'])
 			get_invert_node_inputs(invert_node, 'Color', self.matte_invert)
-			node_group.links.new(set_matte_node.outputs[0], matte_node.inputs[0])
+			inputs = matte_node.inputs[0]
+			node_group.links.new(set_matte_node.outputs[0], inputs)
 
 		else:
 			if matte_node:
@@ -93,23 +95,38 @@ class Matte_Props(bpy.types.PropertyGroup):
 			if invert_node:
 				node_group.nodes.remove(invert_node)
 		
-		compositor = node_group.compositor_props
+		is_valid = True
+		for l in node_group.links:
+			if l.is_valid == False:
+				is_valid = False
+				break
 
-		if compositor.layer.get(self.matte):
+		if is_valid == False:
+			for l in node_group.links:
+				if l.from_socket == set_matte_node.outputs[0] and l.to_socket == inputs:
+					node_group.links.remove(l)
+					break
+
+			self.matte = 'None'
+
+		elif is_valid == True:	
+			compositor = node_group.compositor_props
+
+			if compositor.layer.get(self.matte):
+				
+				if compositor.layer[self.matte].is_matte == False:
+					compositor.layer[self.matte].hide = True
 			
-			if compositor.layer[self.matte].is_matte == False:
-				compositor.layer[self.matte].hide = True
-		
-		is_matte = []
-		for layer in compositor.layer:
-			if layer.matte != "None":
-				is_matte.append(layer.matte)
+			is_matte = []
+			for layer in compositor.layer:
+				if layer.matte != "None":
+					is_matte.append(layer.matte)
 
-		for layer in compositor.layer:
-			if layer.name in is_matte:
-				layer.is_matte = True
-			else:
-				layer.is_matte = False
+			for layer in compositor.layer:
+				if layer.name in is_matte:
+					layer.is_matte = True
+				else:
+					layer.is_matte = False
 
 	def update_matte_type(self, context):
 		props = context.scene.compositor_layer_props

@@ -4,8 +4,26 @@ from .node_data import *
 from bpy_extras.io_utils import ImportHelper
 
 class Source_Props(bpy.types.PropertyGroup):
+	def get_name(self):
+		return self.get("name", "")
+
+	def set_name(self, value):
+		if value == '':
+			value = self.type
+
+		# Define props
+		context = bpy.context
+		props = context.scene.compositor_layer_props
+
+		# Check existing layer
+		existing_names = [item.name for item in props.source if item.name != self.sub_name]
+
+		new_name = unique_name(value, existing_names)
+
+		self["name"] = new_name
+
 	def update_name(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		
 		if len(get_scene_compositor(context)) > 0:
 			for name in get_scene_compositor(context):
@@ -29,7 +47,7 @@ class Source_Props(bpy.types.PropertyGroup):
 				node.node_tree.name = self.name
 			self.sub_name = self.name
 
-	name : bpy.props.StringProperty(name='Source Name', update=update_name)
+	name : bpy.props.StringProperty(name='Source Name', update=update_name, get=get_name, set=set_name)
 	sub_name : bpy.props.StringProperty()
 	type : bpy.props.StringProperty()
 	icon : bpy.props.StringProperty()
@@ -83,7 +101,7 @@ class Add_OT_Source(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		# Set new source node location next to the last source node
@@ -95,12 +113,11 @@ class Add_OT_Source(bpy.types.Operator):
 			sub_node = node
 			break
 
-		if self.type in source_node_data:
-			node = tree.nodes.new(source_node_data[self.type][1])
-			node.name = source_node_data[self.type][0]
-		elif self.type in texture_node_data:
-			node = tree.nodes.new(texture_node_data[self.type][1])
-			node.name = texture_node_data[self.type][0]
+		node_data = source_node_data | texture_node_data
+
+		node = tree.nodes.new(self.type)
+		node.name = node_data[self.type][0]
+
 		if sub_node:
 			node.location = (sub_node.location[0],sub_node.location[1]-350)
 
@@ -108,11 +125,8 @@ class Add_OT_Source(bpy.types.Operator):
 		item = props.source.add()
 		item.name = node.name
 		item.sub_name = node.name
-		item.type = node.type
-		if self.type in source_node_data:
-			item.icon = source_node_data[self.type][2]
-		elif self.type in texture_node_data:
-			item.icon = texture_node_data[self.type][2]
+		item.type = node_data[self.type][0]
+		item.icon = node_data[self.type][1]
 
 		props.source_index = len(props.source) - 1
 
@@ -126,13 +140,16 @@ class Reload_OT_Source(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		index = props.source_index
 		props.source.clear()
 
 		for node in tree.nodes:
-			if node.type not in source_node_data:
+			if node.bl_idname not in source_node_data or not node.outputs:
+				continue
+			
+			if node.type == 'GROUP' and node.node_tree.name.startswith('.*'):
 				continue
 
 			item = props.source.add()
@@ -140,18 +157,16 @@ class Reload_OT_Source(bpy.types.Operator):
 			item.sub_name = node.name
 
 			if node.type == 'GROUP':
-				if not node.outputs:
-					continue
-				
+
 				if node.node_tree.compositor_props.name:
-					item.type = 'COMPOSITOR'
-					item.icon = source_node_data[node.type][2]
+					item.type = 'Compositor'
+					item.icon = source_node_data[node.bl_idname][1]
 				else:
-					item.type = 'GROUP'
+					item.type = 'Group'
 					item.icon = 'NODETREE'
 			else:
-				item.type = node.type
-				item.icon = source_node_data[node.type][2]
+				item.type = source_node_data[node.bl_idname][0]
+				item.icon = source_node_data[node.bl_idname][1]
 
 		props.source_index = index
 
@@ -166,7 +181,7 @@ class Remove_OT_Source(bpy.types.Operator):
 	index : bpy.props.IntProperty(options={'HIDDEN'})
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		item = props.source[self.index]
@@ -225,7 +240,7 @@ class Load_OT_Source_Media(bpy.types.Operator, ImportHelper):
 	)
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		directory = self.directory
@@ -294,7 +309,7 @@ class Add_Comp_OT_Source(bpy.types.Operator):
 	index : bpy.props.IntProperty(options={'HIDDEN'})
 
 	def compositor_item(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		list = []
 		for i, name in enumerate(get_scene_compositor(context)):
 			node_group = tree.nodes[name].node_tree
@@ -339,18 +354,20 @@ class COMPOSITOR_MT_add_source(bpy.types.Menu):
 	def draw(self, context):
 		layout = self.layout
 
-		layout.operator("scene.comp_new_compositor", text=source_node_data['GROUP'][0], icon= source_node_data['GROUP'][2])
+		group = source_node_data['CompositorNodeGroup']
+		layout.operator("scene.comp_new_compositor", text=group[0], icon=group[1])
 		layout.separator()
 		
 		for item in source_node_data:
 			if item != 'GROUP':
-				layout.operator("scene.comp_add_source", text=source_node_data[item][0], icon = source_node_data[item][2]).type = item
+				layout.operator("scene.comp_add_source", text=source_node_data[item][0], icon = source_node_data[item][1]).type = item
 
 		layout.separator()
 		if bpy.app.version >= (4, 5, 0):
 			layout.menu("COMPOSITOR_MT_add_texture_source", icon = "TEXTURE")
 		elif bpy.app.version < (4, 5, 0):
-			layout.operator("scene.comp_add_source", text=texture_node_data['TEXTURE'][0], icon = "TEXTURE").type = 'TEXTURE'
+			texture = source_node_data['CompositorNodeTexture']
+			layout.operator("scene.comp_add_source", text=texture[0], icon = "TEXTURE").type = 'CompositorNodeTexture'
 
 class COMPOSITOR_MT_add_texture_source(bpy.types.Menu):
 	bl_label = "Texture"
@@ -359,10 +376,12 @@ class COMPOSITOR_MT_add_texture_source(bpy.types.Menu):
 	def draw(self, context):
 		layout = self.layout
 		for item in texture_node_data:
+			if bpy.app.version >= (5, 0, 0) and item == 'CompositorNodeTexture':
+				continue
 			layout.operator("scene.comp_add_source", text=texture_node_data[item][0]).type = item
 
 def draw_source(self, context, box):
-	tree = context.scene.node_tree
+	tree = get_scene_tree(context)
 	props = context.scene.compositor_layer_props
 	
 	row = box.row(align=True)

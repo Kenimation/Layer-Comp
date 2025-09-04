@@ -2,6 +2,28 @@ import bpy
 from ..defs import *
 
 class Mask_Props(bpy.types.PropertyGroup):
+	def get_name(self):
+		return self.get("name", "")
+
+	def set_name(self, value):
+		if value == '':
+			value = self.type
+
+		# Define props
+		context = bpy.context
+		tree = get_scene_tree(context)
+		props = context.scene.compositor_layer_props
+		node_group = tree.nodes[props.compositor_panel].node_tree
+		compositor = node_group.compositor_props
+		layer = compositor.layer[compositor.layer_index]
+
+		# Check existing layer
+		existing_names = [item.name for item in layer.mask if item.name != self.sub_name]
+
+		new_name = unique_name(value, existing_names)
+
+		self["name"] = new_name
+
 	def update_name(self, context):
 		props = context.scene.compositor_layer_props
 		node_group = bpy.data.node_groups[props.compositor_panel]
@@ -24,7 +46,7 @@ class Mask_Props(bpy.types.PropertyGroup):
 		node = node_group.nodes.get(f'{layer.name}.Mask.{self.name}')
 		node.mute = self.hide
 
-	name : bpy.props.StringProperty(name='Mask Name', update=update_name)
+	name : bpy.props.StringProperty(name='Mask Name', update=update_name, get=get_name, set=set_name)
 	sub_name : bpy.props.StringProperty()
 	type : bpy.props.StringProperty()
 	hide : bpy.props.BoolProperty(name='Hide Mask', update=update_hide)
@@ -48,17 +70,20 @@ class Add_OT_Mask(bpy.types.Operator):
 		layout = self.layout
 		layout.label(text="Mask Type")
 		layout.prop(self, "mask_type", expand = True)
-			  
+
 	def execute(self, context):
 		props = context.scene.compositor_layer_props
 		node_group = bpy.data.node_groups[props.compositor_panel]
 		compositor = node_group.compositor_props
-		layer = compositor.layer[compositor.layer_index] 
+		layer = compositor.layer[compositor.layer_index]
 
 		sub_mix_node = node_group.nodes.get(f'{layer.name}.Mix_Sub')
 		math_node = node_group.nodes.get(f'{layer.name}.Mask_Mix')
 		feather_node = node_group.nodes.get(f'{layer.name}.Mask_Feather')
 		frame = node_group.nodes.get(f"{layer.name}.Frame")
+		
+		existing_names = [item.name for item in layer.mask]
+		name = unique_name(self.mask_type, existing_names)
 
 		if not math_node:
 			math_node = node_group.nodes.new('CompositorNodeMath')
@@ -93,14 +118,15 @@ class Add_OT_Mask(bpy.types.Operator):
 		else:
 			mask_node = node_group.nodes.new("CompositorNodeEllipseMask")
 
-		mask_node.name = f'{layer.name}.Mask.{self.mask_type}'
+		mask_node.name = f'{layer.name}.Mask.{name}'
+		mask_node.parent = frame
+
 		if bpy.app.version >= (4, 5, 0):
 			mask_node.inputs[3].default_value[0] = 1
 			mask_node.inputs[3].default_value[1] = 0.55
 		if bpy.app.version < (4, 5, 0):
 			mask_node.mask_width = 1
 			mask_node.mask_height = 0.55
-		mask_node.parent = frame
 
 		if len(layer.mask) > 0:
 			sub_node = node_group.nodes.get(f'{layer.name}.Mask.{layer.mask[-1].name}')
@@ -113,9 +139,9 @@ class Add_OT_Mask(bpy.types.Operator):
 			node_group.links.new(mask_node.outputs[0], feather_node.inputs[0])
 
 		item = layer.mask.add()
-		item.name = mask_node.name.replace(f'{layer.name}.Mask.', '')
-		item.sub_name = mask_node.name.replace(f'{layer.name}.Mask.', '')
-		item.type = self.mask_type 
+		item.name = name
+		item.sub_name = name
+		item.type = self.mask_type
 		return {"FINISHED"}
 
 class Remove_OT_Mask(bpy.types.Operator):
@@ -215,11 +241,6 @@ class Duplicate_OT_Mask(bpy.types.Operator):
 
 		convert_node_data(mask_node, new_mask_node)
 
-		# Check existing name
-		existing_names = [item.name for item in layer.mask]
-		source_name = unique_name(mask.name, existing_names)
-		new_mask.name = source_name
-
 		return {"FINISHED"}
 
 class Copy_OT_Mask(bpy.types.Operator):
@@ -229,7 +250,7 @@ class Copy_OT_Mask(bpy.types.Operator):
 	bl_options = {'REGISTER', 'UNDO'}
 
 	def compositor_item(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		list = []
 		for i, name in enumerate(get_scene_compositor(context)):
 			node_group = tree.nodes[name].node_tree
@@ -239,7 +260,7 @@ class Copy_OT_Mask(bpy.types.Operator):
 		return list
 	
 	def layer_item(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		node_group = tree.nodes[self.compositor].node_tree
 		compositor = node_group.compositor_props
 		list = []
@@ -249,7 +270,7 @@ class Copy_OT_Mask(bpy.types.Operator):
 		return list
 	
 	def mask_item(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		node_group = tree.nodes[self.compositor].node_tree
 		compositor = node_group.compositor_props
 		layer = compositor.layer[int(self.layer)]
@@ -284,7 +305,7 @@ class Copy_OT_Mask(bpy.types.Operator):
 
 	@classmethod
 	def poll(cls, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		for name in get_scene_compositor(context):
 			node_group = tree.nodes[name].node_tree
 			comp = node_group.compositor_props
@@ -302,7 +323,7 @@ class Copy_OT_Mask(bpy.types.Operator):
 			self.report({"INFO"}, "No mask")
 			return {"FINISHED"}
 		
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		node_group = tree.nodes[props.compositor_panel].node_tree
@@ -355,7 +376,7 @@ class COMPOSITOR_MT_masks_specials(bpy.types.Menu):
 		layout.operator("scene.comp_clear_mask", text="Clear Masks", icon='TRASH', emboss = False)
 
 def draw_mask(self, context, box):
-	tree = context.scene.node_tree
+	tree = get_scene_tree(context)
 	props = context.scene.compositor_layer_props
 	node_group = tree.nodes[props.compositor_panel].node_tree
 	compositor = node_group.compositor_props
@@ -375,7 +396,6 @@ def draw_mask(self, context, box):
 	elif bpy.app.version < (4, 5, 0):
 		col.prop(feather_node.inputs[1], 'default_value', text="Size")
 		col.prop(feather_node, 'use_extended_bounds', text="Extends Bounds")
-		
 
 	for i, mask in enumerate(layer.mask):
 		node = node_group.nodes[f'{layer.name}.Mask.{mask.name}']

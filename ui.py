@@ -11,9 +11,7 @@ class Compositor_Layer:
 	def draw_compositor(self, context, box):
 		scene = context.scene
 		rd = context.scene.render
-		tree = context.scene.node_tree
 		props = context.scene.compositor_layer_props
-		view_layer = context.view_layer
 		addon_prefs = get_addon_preference(context)
 
 		row = box.row()
@@ -79,37 +77,45 @@ class Compositor_Layer:
 						col.prop(node, "label", text = "Label")
 						xbox.template_node_inputs(node)
 		
-		if addon_prefs.effect_preset_panel:
-			header, panel = self.layout.panel(idname="Effect Presets", default_closed=True)
-			header.label(text="Effect Presets", icon='SHADERFX')
-			header.menu("COMPOSITOR_MT_preset_specials", icon='DOWNARROW_HLT', text="")
+		if addon_prefs.preset_panel:
+			header, panel = self.layout.panel(idname="Presets", default_closed=True)
+			header.label(text="Presets", icon='PRESET')
+
 			if panel:
 				xbox = panel.box()
-				col = xbox.column()
-				col.operator("scene.comp_new_effect_preset", text="Create New Preset", icon='ADD')
-				if context.area.ui_type == 'CompositorNodeTree':
-					col.operator("scene.comp_save_effect_preset", text='Save selected as preset', icon = "FILE_TICK")
+				row = xbox.row(align=True)
+				row.prop(addon_prefs, 'preset_type', expand=True)
+				row.menu("COMPOSITOR_MT_preset_specials", icon='DOWNARROW_HLT', text="")
 
-				presets = get_presets()
+				type = addon_prefs.preset_type
+				
+				col = xbox.column()
+				col.operator("scene.comp_new_preset", text="Create New Preset", icon='ADD').type = type
+				if context.area.ui_type == 'CompositorNodeTree' and type == 'Effects':
+					col.operator("scene.comp_save_preset", text='Save selected as preset', icon = "FILE_TICK").type = type
+
+				presets = get_presets(type)
 				if len(presets) > 0:
 					col = xbox.column()
 					for preset in presets:
 						header, panel = col.panel(idname=f"{preset}.presets", default_closed=True)
 						header.label(text=preset)
-						header.operator("scene.comp_remove_preset", text='', icon = "X", emboss=False).name = preset
+						remove = header.operator("scene.comp_remove_preset", text='', icon = "X", emboss=False)
+						remove.type = type
+						remove.name = preset
 						if panel:
-							effects = get_effect_presets(preset)
+							items = get_presets_item(preset, type)
 							panel_box = panel.box()
-							if len(effects) > 0:
+							if len(items) > 0:
 								sub = panel_box.column()
-								for effect in effects:
+								for item in items:
 									row = sub.row()
-									row.label(text=effect, icon = "SHADERFX")
-									remove = row.operator("scene.comp_remove_effect_preset", text='', icon = "REMOVE", emboss=False)
+									row.label(text=item, icon = "SHADERFX" if type == 'Effects' else "NODE_COMPOSITING")
+									remove = row.operator("scene.comp_remove_preset_item", text='', icon = "REMOVE", emboss=False)
 									remove.preset = preset
-									remove.target = effect
+									remove.target = item
 							else:
-								panel_box.label(text="Preset has no effect", icon = "FILEBROWSER")
+								panel_box.label(text="Preset has item", icon = "FILEBROWSER")
 				else:
 					xbox.label(text="No Presets", icon = "FILEBROWSER")
 
@@ -152,7 +158,7 @@ class COMPOSITOR_PT_options(bpy.types.Panel):
 		col = layout.column(heading="Panel", align=True)
 		col.prop(addon_prefs, "view3d", text="3D Viewport Panel")
 		col.prop(addon_prefs, "active_node_panel", text="Active Node")
-		col.prop(addon_prefs, "effect_preset_panel", text="Effect Presets")
+		col.prop(addon_prefs, "preset_panel", text="Presets Panel")
 		col = layout.column(heading = "Compositor")
 		col.prop(addon_prefs, "search", text="Search Box")
 		row = col.row()

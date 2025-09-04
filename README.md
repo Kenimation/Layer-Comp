@@ -46,12 +46,13 @@ This addon provides a system and pipeline; it won't provide many more feature no
 ![Image](https://i.imgur.com/8Cce8EO.gif)
 
 # Link socket for the effect
-* Allows you to control the effect value with a layer).
+* Allows you to control the effect value with a layer.
 
 ![Image](https://imgur.com/NYiZJwG.png)
 
 # Save and share your custom effects
 * Custom effect requires node group type and one 'Image' input, and at least one output
+
 ![Image](https://i.imgur.com/9CRa0El.gif)
 
 * Load and export your effect presets (Notice, effect presets are .blend files)

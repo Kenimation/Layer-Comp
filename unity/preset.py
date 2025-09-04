@@ -5,13 +5,21 @@ from ..defs import *
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 
 class New_OT_Preset(bpy.types.Operator):
-	bl_idname = "scene.comp_new_effect_preset"
-	bl_label = "New Effect Presets"
-	bl_description = "New Effect Presets"
+	bl_idname = "scene.comp_new_preset"
+	bl_label = "New Presets"
+	bl_description = "New Presets"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	name : bpy.props.StringProperty(options={'HIDDEN'})
-
+	type : bpy.props.EnumProperty(
+						default = "Effects",
+						name = "Type",
+						items = [('Effects', 'Effect', ''),
+								('Compositors', 'Compositor', ''),
+								],
+						options={'HIDDEN'}
+								)
+	
 	def invoke(self, context, event):
 		self.name = "New Preset"
 		return context.window_manager.invoke_props_dialog(self)
@@ -19,7 +27,7 @@ class New_OT_Preset(bpy.types.Operator):
 	def draw(self, context):
 		layout = self.layout
 		col = layout.column()
-		if self.name in get_presets():
+		if self.name in get_presets(self.type):
 			sub = col.row()
 			sub.alert = True
 			sub.label(text = "Preset's name exists")
@@ -32,9 +40,9 @@ class New_OT_Preset(bpy.types.Operator):
 		col.prop(self,"name", text = "")
 
 	def execute(self, context):
-		if self.name in get_presets():
+		if self.name in get_presets(self.type):
 			return context.window_manager.invoke_props_dialog(self)
-		filepath = get_filepath()
+		filepath = get_filepath(self.type)
 		blendfile  = os.path.join(filepath, f"{self.name}.blend")
 		data_blocks = set()
 		bpy.data.libraries.write(blendfile, data_blocks, fake_user=True, compress=True)
@@ -42,30 +50,50 @@ class New_OT_Preset(bpy.types.Operator):
 	
 class Remove_OT_Preset(bpy.types.Operator):
 	bl_idname = "scene.comp_remove_preset"
-	bl_label = "Remove Effect Presets"
-	bl_description = "Remove Effect Presets"
+	bl_label = "Remove Presets"
+	bl_description = "Remove Presets"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	name : bpy.props.StringProperty(options={'HIDDEN'})
+	type : bpy.props.EnumProperty(
+						default = "Effects",
+						name = "Type",
+						items = [('Effects', 'Effect', ''),
+								('Compositors', 'Compositor', ''),
+								],
+						options={'HIDDEN'}
+								)
+
+	def invoke(self, context, event):
+		wm = context.window_manager
+		return wm.invoke_props_dialog(self)
 
 	def execute(self, context):
-		filepath = get_filepath()
+		filepath = get_filepath(self.type)
 		blendfile  = os.path.join(filepath, f"{self.name}.blend")
 		os.remove(blendfile)
 		return {"FINISHED"}
 
 class Export_OT_Preset(bpy.types.Operator, ExportHelper):
 	bl_idname = "scene.comp_export_preset"
-	bl_label = "Export Effect Presets"
-	bl_description = "Export Effect Presets"
+	bl_label = "Export Presets"
+	bl_description = "Export Presets"
 	filename_ext = ".blend"
 
 	name : bpy.props.StringProperty(options={'HIDDEN'})
-
+	type : bpy.props.EnumProperty(
+						default = "Effects",
+						name = "Type",
+						items = [('Effects', 'Effect', ''),
+								('Compositors', 'Compositor', ''),
+								],
+						options={'HIDDEN'}
+								)
+	
 	def execute(self, context):
 		destination_file = self.filepath
 		# Source and destination file paths
-		filepath = get_filepath()
+		filepath = get_filepath(self.type)
 		source_file = os.path.join(filepath, f"{self.name}.blend")
 
 		try:
@@ -78,8 +106,8 @@ class Export_OT_Preset(bpy.types.Operator, ExportHelper):
 
 class Load_OT_Preset(bpy.types.Operator, ImportHelper):
 	bl_idname = "scene.comp_load_preset"
-	bl_label = "Load Effect Presets"
-	bl_description = "Load Effect Presets"
+	bl_label = "Load Presets"
+	bl_description = "Load Presets"
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	filename_ext = '.blend'
@@ -99,23 +127,31 @@ class Load_OT_Preset(bpy.types.Operator, ImportHelper):
 		name="Save as presets",
 		default=False
 	)	
+	type : bpy.props.EnumProperty(
+						default = "Effects",
+						name = "Type",
+						items = [('Effects', 'Effect', ''),
+								('Compositors', 'Compositor', ''),
+								],
+						options={'HIDDEN'}
+								)
 
 	def execute(self, context):
 		directory = self.directory
 		
 		for file_elem in self.files:
 			blend = os.path.join(directory, file_elem.name)
-			presets = os.path.join(get_filepath(), file_elem.name)
+			presets = os.path.join(get_filepath(self.type), file_elem.name)
 			shutil.copyfile(blend, presets)
 
 		self.report({"INFO"}, "Loaded All Presets!")
 
 		return {"FINISHED"}
 
-class Save_OT_Effect_Preset(bpy.types.Operator):
-	bl_idname = "scene.comp_save_effect_preset"
-	bl_label = "Save Effect Presets"
-	bl_description = "Save Effect Presets"
+class Save_OT_Preset(bpy.types.Operator):
+	bl_idname = "scene.comp_save_preset"
+	bl_label = "Save Presets"
+	bl_description = "Save Presets"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	unavailable_node = {}
@@ -123,7 +159,7 @@ class Save_OT_Effect_Preset(bpy.types.Operator):
 
 	def preset_item(self, context):
 		list = []
-		presets = get_presets()
+		presets = get_presets(self.type)
 		for name in presets:
 			list.append((name, name, ''))
 		return list
@@ -136,17 +172,26 @@ class Save_OT_Effect_Preset(bpy.types.Operator):
 					name='Preset', 
 					description = "Preset that your effect save.",
 					items = preset_item,)
+	
+	type : bpy.props.EnumProperty(
+						default = "Effects",
+						name = "Type",
+						items = [('Effects', 'Effect', ''),
+								('Compositors', 'Compositor', ''),
+								],
+						options={'HIDDEN'}
+								)
 
 	def invoke(self, context, event):
 		self.unavailable_node = {}
 		self.exist_node = []
 		self.overwrite = False
 		self.skip = False
-		if len(get_presets()) == 0:
-			bpy.ops.scene.comp_new_effect_preset(name="New Preset")
+		if len(get_presets(self.type)) == 0:
+			bpy.ops.scene.comp_new_preset(name="New Preset", type=self.type)
 			return self.execute(context)
 		else:
-			self.preset = get_presets()[0]
+			self.preset = get_presets(self.type)[0]
 			return context.window_manager.invoke_props_dialog(self)
 	
 	def draw(self, context):
@@ -179,7 +224,7 @@ class Save_OT_Effect_Preset(bpy.types.Operator):
 				col.label(text=node.node_tree.name)
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		selected_node = [node for node in tree.nodes if node.select and node.type == "GROUP"]
 
 		self.available_node = []
@@ -203,7 +248,7 @@ class Save_OT_Effect_Preset(bpy.types.Operator):
 			return context.window_manager.invoke_props_dialog(self)
 
 		# Get preset filepath
-		filepath = get_filepath()
+		filepath = get_filepath(self.type)
 		blendfile  = os.path.join(filepath, f"{self.preset}.blend")
 
 		# Create a appended group list
@@ -237,18 +282,26 @@ class Save_OT_Effect_Preset(bpy.types.Operator):
 			if bpy.data.node_groups[group].use_fake_user == False and bpy.data.node_groups[group].users == 0:
 				bpy.data.node_groups.remove(bpy.data.node_groups[group])
 
-		self.report({"INFO"}, f"Save Effect Preset!")
+		self.report({"INFO"}, f"Save Preset!")
 
 		return {"FINISHED"}
 
-class Remove_OT_Effect_Preset(bpy.types.Operator):
-	bl_idname = "scene.comp_remove_effect_preset"
-	bl_label = "Remove Effect Presets"
-	bl_description = "Remove Effect Presets"
+class Remove_OT_Preset_Item(bpy.types.Operator):
+	bl_idname = "scene.comp_remove_preset_item"
+	bl_label = "Remove Presets"
+	bl_description = "Remove Presets"
 	bl_options = {'REGISTER', 'UNDO'}
 
 	preset : bpy.props.StringProperty(options={'HIDDEN'})
 	target : bpy.props.StringProperty(options={'HIDDEN'})
+	type : bpy.props.EnumProperty(
+						default = "Effects",
+						name = "Type",
+						items = [('Effects', 'Effect', ''),
+								('Compositors', 'Compositor', ''),
+								],
+						options={'HIDDEN'}
+								)
 
 	def invoke(self, context, event):
 		wm = context.window_manager
@@ -259,7 +312,7 @@ class Remove_OT_Effect_Preset(bpy.types.Operator):
 		target = self.target
 
 		# Get preset filepath
-		filepath = get_filepath()
+		filepath = get_filepath(self.type)
 		blendfile  = os.path.join(filepath, f"{self.preset}.blend")
 		
 		# Get current node group fake user and set all their use_fake_user to True
@@ -301,21 +354,28 @@ class COMPOSITOR_MT_preset_specials(bpy.types.Menu):
 	bl_options = {'SEARCH_ON_KEY_PRESS'}
 
 	def draw(self, context):
+		addon_prefs = get_addon_preference(context)
+		type = addon_prefs.preset_type
+		
 		layout = self.layout
-		layout.operator("scene.comp_load_preset", text='Load Effect Presets', icon = "IMPORT")
-		layout.menu("COMPOSITOR_MT_export_presets", text='Export Effect Presets', icon = "EXPORT")
-		layout.operator("scene.comp_save_effect_preset", text='Save selected as preset', icon = "FILE_TICK")
+		layout.operator("scene.comp_load_preset", text='Load Presets', icon = "IMPORT").type = type
+		layout.menu("COMPOSITOR_MT_export_presets", text='Export Presets', icon = "EXPORT")
 
 class COMPOSITOR_MT_export_presets(bpy.types.Menu):
 	bl_label = "Export Preset"
 	bl_options = {'SEARCH_ON_KEY_PRESS'}
 
 	def draw(self, context):
+		addon_prefs = get_addon_preference(context)
+		type = addon_prefs.preset_type
+
 		layout = self.layout
-		presets = get_presets()
+		presets = get_presets(type)
 		if len(presets) > 0:
 			for name in presets:
-				layout.operator("scene.comp_export_preset", text=name).name = name
+				export = layout.operator("scene.comp_export_preset", text=name)
+				export.type = type
+				export.name = name
 		else:
 			layout.label(text="No Preset")
 
@@ -324,8 +384,8 @@ classes = (
 	Remove_OT_Preset,
 	Export_OT_Preset,
 	Load_OT_Preset,
-	Save_OT_Effect_Preset,
-	Remove_OT_Effect_Preset,
+	Save_OT_Preset,
+	Remove_OT_Preset_Item,
 	COMPOSITOR_MT_preset_specials,
 	COMPOSITOR_MT_export_presets,
 		  )

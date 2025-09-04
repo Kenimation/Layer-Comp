@@ -4,7 +4,7 @@ from .layer import Layer_Props
 
 class Compositor_Props(bpy.types.PropertyGroup):
 	def update_name(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		group_node = tree.nodes.get(self.sub_name)
 		node_group = bpy.data.node_groups.get(self.sub_name)
 		if group_node and node_group:
@@ -44,7 +44,7 @@ class New_OT_Compositor(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 		
 		links = tree.links
@@ -119,7 +119,7 @@ class Duplicate_OT_Compositor(bpy.types.Operator):
 
 	def execute(self, context):
 		# Define props
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		props = context.scene.compositor_layer_props
 
 		links = tree.links
@@ -173,7 +173,7 @@ class Remove_OT_Compositor(bpy.types.Operator):
 	name : bpy.props.StringProperty(options={'HIDDEN'})
 
 	def execute(self, context):
-		tree = context.scene.node_tree
+		tree = get_scene_tree(context)
 		links = tree.links
 
 		props = context.scene.compositor_layer_props
@@ -209,7 +209,7 @@ class Remove_OT_Compositor(bpy.types.Operator):
 		return {"FINISHED"}
 
 def draw_compositor(self, context, box):
-	tree = context.scene.node_tree
+	tree = get_scene_tree(context)
 	props = context.scene.compositor_layer_props
 
 	if bpy.app.version >= (4, 5, 0):
